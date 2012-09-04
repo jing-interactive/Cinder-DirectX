@@ -8,8 +8,8 @@
 #endif
 
 #include <d3d11.h>
-#include <d3dx11.h>
 #include <dxerr.h>
+#include <d3dcompiler.h>
 
 #include "cinder/Exception.h"
 #include "cinder/Quaternion.h"
@@ -72,6 +72,8 @@ ID3D11DeviceContext* getImmediateContext();
 
 //! Clears the DX9 color buffer using \a color and optionally clears the depth buffer when \a clearDepthBuffer
 void clear( const ColorA &color = ColorA::black(), bool clearDepthBuffer = true, float clearZValue = 1.0f);
+
+HRESULT compileShaderFromFile(const WCHAR* szFileName, LPCSTR szEntryPoint, LPCSTR szShaderModel, ID3DBlob** ppBlobOut );
 
 void blendFunction(D3D11_BLEND  src, D3D11_BLEND dst);
 

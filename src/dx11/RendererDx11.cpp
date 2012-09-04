@@ -122,8 +122,7 @@ void RendererDX11::setup( App *aApp, HWND wnd, HDC dc )
 	}
     else
     {
-        OutputDebugStringA(getDescription(featureLevel));
-        OutputDebugStringA("\n");
+        console() << getDescription(featureLevel) << std::endl;
     }
 
 	// Check 4X MSAA quality support for our back buffer format.

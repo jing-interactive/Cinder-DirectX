@@ -1,20 +1,14 @@
 #include "dx11/dx11.h"
 
 #pragma comment( lib, "dxerr.lib" )
-#pragma comment( lib, "dxguid.lib" )
 #pragma comment( lib, "d3d11.lib" )
-#ifdef _DEBUG
-#pragma comment( lib, "d3dx11d.lib" )
-#else
-#pragma comment( lib, "d3dx11.lib" )
-#endif
+#pragma comment( lib, "d3dcompiler.lib" )
 
 #include "cinder/CinderMath.h"
 #include "cinder/Vector.h"
 #include "cinder/Camera.h"
 #include "cinder/TriMesh.h"
 #include "cinder/Sphere.h"
-//#include "dx9/Texture.h"
 #include "cinder/Text.h"
 #include "cinder/PolyLine.h"
 #include "cinder/Path2d.h"
@@ -48,6 +42,60 @@ void clear( const ColorA &color, bool clearDepthBuffer, float clearZ)
 
     if (clearDepthBuffer)
         g_immediateContex->ClearDepthStencilView(g_DepthStencilView, D3D11_CLEAR_DEPTH|D3D11_CLEAR_STENCIL, clearZ, 0);
+}
+
+
+HRESULT compileShaderFromFile(const WCHAR* szFileName, LPCSTR szEntryPoint, LPCSTR szShaderModel, ID3DBlob** ppBlobOut )
+{
+    HRESULT hr = S_OK;
+
+    DWORD dwShaderFlags = D3DCOMPILE_ENABLE_STRICTNESS;
+#if defined( DEBUG ) || defined( _DEBUG )
+    // Set the D3DCOMPILE_DEBUG flag to embed debug information in the shaders.
+    // Setting this flag improves the shader debugging experience, but still allows 
+    // the shaders to be optimized and to run exactly the way they will run in 
+    // the release configuration of this program.
+    dwShaderFlags |= D3DCOMPILE_DEBUG;
+#endif
+
+    // open the file
+    HANDLE hFile = CreateFile( szFileName, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING,
+                               FILE_FLAG_SEQUENTIAL_SCAN, NULL );
+    if( INVALID_HANDLE_VALUE == hFile )
+        return D3D11_ERROR_FILE_NOT_FOUND;
+
+    // Get the file size
+    LARGE_INTEGER FileSize;
+    GetFileSizeEx( hFile, &FileSize );
+
+    // create enough space for the file data
+    BYTE* pFileData = new BYTE[ FileSize.LowPart ];
+    if( !pFileData )
+        return E_OUTOFMEMORY;
+
+    // read the data in
+    DWORD BytesRead;
+    if( !ReadFile( hFile, pFileData, FileSize.LowPart, &BytesRead, NULL ) )
+        return E_FAIL; 
+
+    CloseHandle( hFile );
+
+    // compiling
+    ID3DBlob* pErrorBlob = NULL;
+
+    hr = D3DCompile( pFileData, FileSize.LowPart, NULL,
+        NULL, NULL,
+        szEntryPoint, szShaderModel, 
+        dwShaderFlags, 0, 
+        ppBlobOut, &pErrorBlob);
+    if( FAILED(hr) )
+    {
+        if( pErrorBlob != NULL )
+            OutputDebugStringA( (char*)pErrorBlob->GetBufferPointer() );
+    }
+    SAFE_RELEASE(pErrorBlob);
+
+    return hr;
 }
 
 void setModelView( const Camera &cam )
