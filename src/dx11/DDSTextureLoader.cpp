@@ -5,9 +5,9 @@
 //
 // Copyright (c) Microsoft Corporation. All rights reserved.
 //--------------------------------------------------------------------------------------
-#include "DXUT.h"
-#include "DDSTextureLoader.h"
-#include "DDS.h"
+#include "dx11/dx11.h"
+#include "dx11/DDSTextureLoader.h"
+#include "dx11/DDS.h"
 
 //--------------------------------------------------------------------------------------
 static HRESULT LoadTextureDataFromFile( __in_z const WCHAR* szFileName, BYTE** ppHeapData,
@@ -363,7 +363,7 @@ static void GetSurfaceInfo( UINT width, UINT height, D3DFORMAT fmt, UINT* pNumBy
     //     When computing DXTn compressed sizes for non-square textures, the 
     //     following formula should be used at each mipmap level:
     //
-    //         max(1, width ÷ 4) x max(1, height ÷ 4) x 8(DXT1) or 16(DXT2-5)
+    //         max(1, width ?4) x max(1, height ?4) x 8(DXT1) or 16(DXT2-5)
     //
     //     The pitch for DXTn formats is different from what was returned in 
     //     Microsoft DirectX 7.0. It now refers the pitch of a row of blocks. 
@@ -374,10 +374,10 @@ static void GetSurfaceInfo( UINT width, UINT height, D3DFORMAT fmt, UINT* pNumBy
     {
         int numBlocksWide = 0;
         if( width > 0 )
-            numBlocksWide = max( 1, width / 4 );
+            numBlocksWide = std::max<int>( 1, width / 4 );
         int numBlocksHigh = 0;
         if( height > 0 )
-            numBlocksHigh = max( 1, height / 4 );
+            numBlocksHigh = std::max<int>( 1, height / 4 );
         int numBytesPerBlock = ( fmt == D3DFMT_DXT1 ? 8 : 16 );
         rowBytes = numBlocksWide * numBytesPerBlock;
         numRows = numBlocksHigh;
@@ -442,10 +442,10 @@ static void GetSurfaceInfo( UINT width, UINT height, DXGI_FORMAT fmt, UINT* pNum
     {
         int numBlocksWide = 0;
         if( width > 0 )
-            numBlocksWide = max( 1, width / 4 );
+            numBlocksWide = std::max<int>( 1, width / 4 );
         int numBlocksHigh = 0;
         if( height > 0 )
-            numBlocksHigh = max( 1, height / 4 );
+            numBlocksHigh = std::max<int>( 1, height / 4 );
         rowBytes = numBlocksWide * bcnumBytesPerBlock;
         numRows = numBlocksHigh;
     }
@@ -896,7 +896,10 @@ static HRESULT CreateTextureFromDDS( ID3D11Device* pDev, DDS_HEADER* pHeader, __
     }
     
     if ( bSRGB )
-        desc.Format = MAKE_SRGB( desc.Format );
+    {
+        OutputDebugStringA("MAKE_SRGB not implemented!\n");
+        //desc.Format = MAKE_SRGB( desc.Format );
+    }
 
     // Create the texture
     desc.Width = iWidth;

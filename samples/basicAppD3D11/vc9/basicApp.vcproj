@@ -61,9 +61,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="cinder_d.lib"
+				AdditionalDependencies="cinder_d.lib Effects11.lib"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="..\..\..\..\..\lib;..\..\..\..\..\lib\msw"
+				AdditionalLibraryDirectories="..\..\..\..\..\lib;..\..\..\..\..\lib\msw;..\..\..\Effects11\Debug"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				RandomizedBaseAddress="1"
@@ -136,9 +136,9 @@
 			<Tool
 				Name="VCLinkerTool"
 				LinkLibraryDependencies="true"
-				AdditionalDependencies="cinder.lib"
+				AdditionalDependencies="cinder.lib Effects11.lib"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="..\..\..\..\..\lib;..\..\..\..\..\lib\msw"
+				AdditionalLibraryDirectories="..\..\..\..\..\lib;..\..\..\..\..\lib\msw;..\..\..\Effects11\Release"
 				GenerateDebugInformation="false"
 				GenerateMapFile="true"
 				SubSystem="2"
@@ -178,6 +178,14 @@
 			Name="dx11"
 			>
 			<File
+				RelativePath="..\..\..\src\dx11\DDSTextureLoader.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\include\dx11\DDSTextureLoader.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\src\dx11\dx11.cpp"
 				>
 			</File>
@@ -191,6 +199,47 @@
 			</File>
 			<File
 				RelativePath="..\..\..\include\dx11\RendererDx11.h"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="shader"
+			>
+			<File
+				RelativePath="..\assets\color.fx"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						CommandLine=""
+						Outputs=""
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\assets\Tutorial02.fx"
+				>
+			</File>
+			<File
+				RelativePath="..\assets\Tutorial03.fx"
+				>
+			</File>
+			<File
+				RelativePath="..\assets\Tutorial04.fx"
+				>
+			</File>
+			<File
+				RelativePath="..\assets\Tutorial05.fx"
+				>
+			</File>
+			<File
+				RelativePath="..\assets\Tutorial06.fx"
+				>
+			</File>
+			<File
+				RelativePath="..\assets\Tutorial07.fx"
 				>
 			</File>
 		</Filter>

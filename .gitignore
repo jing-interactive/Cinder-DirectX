@@ -12,3 +12,6 @@
 *.a
 *.user
 *.suo
+*.ncb
+*.pdb
+*.obj
