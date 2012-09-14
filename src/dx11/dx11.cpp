@@ -98,6 +98,78 @@ HRESULT compileShaderFromFile(const WCHAR* szFileName, LPCSTR szEntryPoint, LPCS
     return hr;
 }
 
+HRESULT createShaderFromPath(const fs::path& filePath, const char* entryName, const char* profileName, 
+	ID3D11VertexShader** pVertexShader, ID3DBlob** pBlobOut)
+{
+    HRESULT hr = E_FAIL;
+	if (!filePath.empty()){
+		ID3DBlob* pShaderBlob = NULL;
+		V(dx11::compileShaderFromFile(filePath.c_str(), entryName, profileName, &pShaderBlob ));
+
+		V(dx11::getDevice()->CreateVertexShader( pShaderBlob->GetBufferPointer(), pShaderBlob->GetBufferSize(), NULL, pVertexShader));
+
+		if (pBlobOut)
+		{// Add reference
+			pShaderBlob->AddRef();
+			*pBlobOut = pShaderBlob;
+		}
+		SAFE_RELEASE(pShaderBlob);
+	}
+	return hr;
+}
+
+HRESULT createShaderFromPath(const fs::path& filePath, const char* entryName, const char* profileName, ID3D11PixelShader** pPixelShader)
+{
+    HRESULT hr = E_FAIL;
+	if (!filePath.empty()){
+		ID3DBlob* pShaderBlob = NULL;
+		V(dx11::compileShaderFromFile(filePath.c_str(), entryName, profileName, &pShaderBlob ));
+
+		V(dx11::getDevice()->CreatePixelShader( pShaderBlob->GetBufferPointer(), pShaderBlob->GetBufferSize(),
+			NULL, pPixelShader));
+		SAFE_RELEASE(pShaderBlob);
+	}
+	return hr;
+}
+
+HRESULT createShaderFromPath(const fs::path& filePath, ID3DX11Effect** pEffect)
+{
+    HRESULT hr = E_FAIL;
+	if (!filePath.empty()){
+		ID3DBlob* pShaderBlob = NULL;
+		V(dx11::compileShaderFromFile(filePath.c_str(), "None", "fx_5_0", &pShaderBlob ));
+
+		V(D3DX11CreateEffectFromMemory(pShaderBlob->GetBufferPointer(),pShaderBlob->GetBufferSize(),
+			0,	dx11::getDevice(),pEffect));
+		SAFE_RELEASE(pShaderBlob);
+	}
+	return hr;
+}
+
+void drawWithTechnique(ID3DX11EffectTechnique* tech, UINT VertexCount, UINT StartVertexLocation)
+{
+    HRESULT hr = S_OK;
+    D3DX11_TECHNIQUE_DESC techDesc;
+    tech->GetDesc( &techDesc );
+    for(UINT p = 0; p < techDesc.Passes; ++p)
+    {
+        tech->GetPassByIndex(p)->Apply(0, getImmediateContext());
+	    getImmediateContext()->Draw(VertexCount, StartVertexLocation);
+    }
+}
+
+void drawIndexedWithTechnique(ID3DX11EffectTechnique* tech, UINT VertexCount, UINT StartVertexLocation, INT BaseVertexLocation)
+{
+    HRESULT hr = S_OK;
+    D3DX11_TECHNIQUE_DESC techDesc;
+    tech->GetDesc( &techDesc );
+    for(UINT p = 0; p < techDesc.Passes; ++p)
+    {
+        tech->GetPassByIndex(p)->Apply(0, getImmediateContext());
+	    getImmediateContext()->DrawIndexed(VertexCount, StartVertexLocation, BaseVertexLocation);
+    }
+}
+
 void setModelView( const Camera &cam )
 {
     //g_immediateContex->SetTransform(D3DTS_VIEW, (D3DMATRIX*)cam.getModelViewMatrix().m);

@@ -201,6 +201,14 @@
 				RelativePath="..\..\..\include\dx11\RendererDx11.h"
 				>
 			</File>
+			<File
+				RelativePath="..\..\..\src\dx11\VertexTypes.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\include\dx11\VertexTypes.h"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="shader"

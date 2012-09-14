@@ -1,6 +1,7 @@
 #pragma once
 
 #include "cinder/Cinder.h"
+#include "cinder/Filesystem.h"
 
 #include <dxsdkver.h>
 #if ( _DXSDK_PRODUCT_MAJOR < 9 || _DXSDK_BUILD_MAJOR < 1949 )
@@ -20,6 +21,7 @@
 #include "cinder/Font.h"
 #include "cinder/PolyLine.h"
 #include "cinder/AxisAlignedBox.h"
+#include "dx11/d3dx11effect.h"
 
 #ifdef _DEBUG
 #ifndef V
@@ -74,6 +76,17 @@ ID3D11DeviceContext* getImmediateContext();
 void clear( const ColorA &color = ColorA::black(), bool clearDepthBuffer = true, float clearZValue = 1.0f);
 
 HRESULT compileShaderFromFile(const WCHAR* szFileName, LPCSTR szEntryPoint, LPCSTR szShaderModel, ID3DBlob** ppBlobOut );
+
+HRESULT createShaderFromPath(const fs::path& filePath, const char* entryName, const char* profileName, 
+	ID3D11VertexShader** pVertexShader, ID3DBlob** pBlobOut = NULL);
+
+HRESULT createShaderFromPath(const fs::path& filePath, const char* entryName, const char* profileName, ID3D11PixelShader** pPixelShader);
+
+HRESULT createShaderFromPath(const fs::path& filePath, ID3DX11Effect** pEffect);
+
+void drawWithTechnique(ID3DX11EffectTechnique* tech, UINT VertexCount, UINT StartVertexLocation);
+
+void drawIndexedWithTechnique(ID3DX11EffectTechnique* tech, UINT VertexCount, UINT StartVertexLocation, INT BaseVertexLocation);
 
 void blendFunction(D3D11_BLEND  src, D3D11_BLEND dst);
 
@@ -315,4 +328,4 @@ class Exception : public cinder::Exception {
 class ExceptionUnknownTarget : public Exception {
 };
 
-} } // namespace cinder::dx9
+} } // namespace cinder::dx11

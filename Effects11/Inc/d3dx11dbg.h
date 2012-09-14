@@ -39,6 +39,10 @@ typedef unsigned short UINT16;
 // DPF
 //----------------------------------------------------------------------------
 
+#ifdef _DEBUG
+#define FXDPF
+#endif
+
 #ifdef FXDPF
 void cdecl D3DXDebugPrintf(UINT lvl, LPCSTR szFormat, ...);
 #define DPF D3DXDebugPrintf
