@@ -1,4 +1,4 @@
 Cinder-DirectX
 ==============
 
-support DX9/DX11 rendering
+supports DX9/DX11 rendering in a standalone block
