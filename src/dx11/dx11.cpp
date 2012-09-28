@@ -132,7 +132,7 @@ HRESULT createShaderFromPath(const fs::path& filePath, const char* entryName, co
 	return hr;
 }
 
-HRESULT createShaderFromPath(const fs::path& filePath, ID3DX11Effect** pEffect)
+HRESULT createEffectFromPath(const fs::path& filePath, ID3DX11Effect** pEffect)
 {
     HRESULT hr = E_FAIL;
 	if (!filePath.empty()){
@@ -263,6 +263,36 @@ void enableAlphaTest( DWORD value, D3D11_COMPARISON_FUNC func )
 void disableAlphaTest()
 {
 	//g_immediateContex->SetRenderState(D3DRS_ALPHATESTENABLE, FALSE);
+}
+
+
+void CameraPerspDX::calcProjection()
+{	
+	mFrustumTop		=  mNearClip * math<float>::tan( (float)M_PI / 180.0f * mFov * 0.5f );
+	mFrustumBottom	= -mFrustumTop;
+	mFrustumRight	=  mFrustumTop * mAspectRatio;
+	mFrustumLeft	= -mFrustumRight;
+
+	float *m = mProjectionMatrix.m;
+	m[ 0] =  2.0f * mNearClip / ( mFrustumRight - mFrustumLeft );
+	m[ 4] =  0.0f;
+	m[ 8] =  ( mFrustumRight + mFrustumLeft ) / ( mFrustumRight - mFrustumLeft );
+	m[12] =  0.0f;
+
+	m[ 1] =  0.0f;
+	m[ 5] =  2.0f * mNearClip / ( mFrustumTop - mFrustumBottom );
+	m[ 9] =  ( mFrustumTop + mFrustumBottom ) / ( mFrustumTop - mFrustumBottom );
+	m[13] =  0.0f;
+
+	m[ 2] =  0.0f;
+	m[ 6] =  0.0f;
+	m[10] = - mFarClip / ( mFarClip - mNearClip);
+	m[14] = - mFarClip * mNearClip / ( mFarClip - mNearClip );
+
+	m[ 3] =  0.0f;
+	m[ 7] =  0.0f;
+	m[11] = -1.0f;
+	m[15] =  0.0f;	 
 }
 
 } } // namespace cinder::dx11

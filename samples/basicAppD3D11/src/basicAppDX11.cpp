@@ -1,5 +1,4 @@
 #include "cinder/app/AppBasic.h"
-#include "cinder/Camera.h"
 #include "cinder/Utilities.h"
 #include "cinder/Rand.h"
 #include "dx11/RendererDx11.h"
@@ -21,7 +20,7 @@ public:
     void setup()
     {
         {// Create Effect
-            V(dx11::createShaderFromPath(getAssetPath(L"color.fx"), &mFX));
+            V(dx11::createEffectFromPath(getAssetPath(L"color.fx"), &mFX));
 	        mTech    = mFX->GetTechniqueByName("ColorTech");
 	        mfxWorldViewProj = mFX->GetVariableByName("gWorldViewProj")->AsMatrix();
 
@@ -35,9 +34,9 @@ public:
         {// Create vertex buffer
             dx11::VertexPC vertices[] =
             {
-                dx11::VertexPC(Vec3f( 0.0f, 0.5f, 0.5f ),ColorA(1,0,0,1)),
-                dx11::VertexPC(Vec3f( 0.5f, -0.5f, 0.5f ),ColorA( 0,1,0,1)),
-                dx11::VertexPC(Vec3f( -0.5f, -0.5f, 0.5f),ColorA(0,0,1,1)),
+                dx11::VertexPC(Vec3f( 0.0f, 0.5f, 0.0f ),ColorA(1,0,0,1)),
+                dx11::VertexPC(Vec3f( 0.5f, -0.5f, 0.0f ),ColorA( 0,1,0,1)),
+                dx11::VertexPC(Vec3f( -0.5f, -0.5f, 0.0f),ColorA(0,0,1,1)),
             };
             CD3D11_BUFFER_DESC bd(sizeof(vertices), D3D11_BIND_VERTEX_BUFFER);
 
@@ -77,8 +76,10 @@ public:
 
         // Set const
         Matrix44f MV = mCam.getModelViewMatrix();
+		console() << MV << endl;
         Matrix44f P = mCam.getProjectionMatrix();
-        Matrix44f MVP = MV*P;
+		console() << P << endl;
+        Matrix44f MVP = P*MV;
     	mfxWorldViewProj->SetMatrix(MVP.m);
 
         // Set primitive topology
@@ -88,12 +89,12 @@ public:
 
     void resize( ResizeEvent event )
     {
-        mCam.lookAt( Vec3f( 0.0f, 0.0f, 10.0f ), Vec3f::zero() );
-        mCam.setPerspective( 60, getWindowAspectRatio(), 1, 5000 );
+		mCam.lookAt( Vec3f( 0.0f, 0.0f, 10.0f ), Vec3f::zero());
+        mCam.setPerspective( 90, event.getAspectRatio(), 0.01f, 1000 );
     }
 
 private: 
-    CameraPersp	mCam;
+	dx11::CameraPerspDX	mCam;
 
     ID3DX11Effect* mFX;
     ID3D11InputLayout*      pInputLayout;

@@ -21,6 +21,7 @@
 #include "cinder/Font.h"
 #include "cinder/PolyLine.h"
 #include "cinder/AxisAlignedBox.h"
+#include "cinder/Camera.h"
 #include "dx11/d3dx11effect.h"
 
 #ifdef _DEBUG
@@ -68,6 +69,10 @@ namespace cinder {
 
 namespace cinder { namespace dx11 {
 
+class CameraPerspDX : public CameraPersp{
+	void calcProjection();
+};
+
 ID3D11Device* getDevice();
 
 ID3D11DeviceContext* getImmediateContext();
@@ -82,7 +87,7 @@ HRESULT createShaderFromPath(const fs::path& filePath, const char* entryName, co
 
 HRESULT createShaderFromPath(const fs::path& filePath, const char* entryName, const char* profileName, ID3D11PixelShader** pPixelShader);
 
-HRESULT createShaderFromPath(const fs::path& filePath, ID3DX11Effect** pEffect);
+HRESULT createEffectFromPath(const fs::path& filePath, ID3DX11Effect** pEffect);
 
 void drawWithTechnique(ID3DX11EffectTechnique* tech, UINT VertexCount, UINT StartVertexLocation);
 
