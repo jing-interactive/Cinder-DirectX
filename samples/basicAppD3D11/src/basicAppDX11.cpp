@@ -6,6 +6,7 @@
 #include <boost/intrusive_ptr.hpp>
 #include "dx11/DDSTextureLoader.h"
 #include "dx11/VertexTypes.h"
+#include "dx11/HlslEffect.h"
 
 using namespace ci;
 using namespace ci::app; 
@@ -20,15 +21,11 @@ public:
     void setup()
     {
         {// Create Effect
-            V(dx11::createEffectFromPath(getAssetPath(L"color.fx"), &mFX));
-	        mTech    = mFX->GetTechniqueByName("ColorTech");
-	        mfxWorldViewProj = mFX->GetVariableByName("gWorldViewProj")->AsMatrix();
+			effect = dx11::HlslEffect(loadAsset(L"color.fx"));
 
-	        // Create the input layout
-            D3DX11_PASS_DESC passDesc;
-            mTech->GetPassByIndex(0)->GetDesc(&passDesc);
-            V(dx11::getDevice()->CreateInputLayout(dx11::VertexPC::InputElements, dx11::VertexPC::InputElementCount, passDesc.pIAInputSignature, 
-		        passDesc.IAInputSignatureSize, &pInputLayout));
+	        // Create the input layout 
+            V(effect.createInputLayout("ColorTech", dx11::VertexPC::InputElements, 
+				dx11::VertexPC::InputElementCount,	&pInputLayout));
         }
 
         {// Create vertex buffer
@@ -48,7 +45,7 @@ public:
 
     void destroy()
     {
-        SAFE_RELEASE(mFX);
+		effect.reset();
         SAFE_RELEASE(pInputLayout);
         SAFE_RELEASE(pVertexBuffer);
     }
@@ -75,16 +72,16 @@ public:
         dx11::getImmediateContext()->IASetVertexBuffers( 0, 1, &pVertexBuffer, &stride, &offset );
 
         // Set const
-        Matrix44f MV = mCam.getModelViewMatrix();
-		console() << MV << endl;
+		Matrix44f W = Matrix44f::identity();
+        Matrix44f V = mCam.getModelViewMatrix();
         Matrix44f P = mCam.getProjectionMatrix();
-		console() << P << endl;
-        Matrix44f MVP = P*MV;
-    	mfxWorldViewProj->SetMatrix(MVP.m);
+        Matrix44f MVP = P*V*W;
+		effect.uniform("gWorldViewProj", MVP);
 
         // Set primitive topology
         dx11::getImmediateContext()->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
-        dx11::drawWithTechnique(mTech, 3, 0);
+  //      dx11::drawWithTechnique(mTech, 3, 0);
+		effect.draw("ColorTech", 3, 0);
     }
 
     void resize( ResizeEvent event )
@@ -95,13 +92,11 @@ public:
 
 private: 
 	dx11::CameraPerspDX	mCam;
-
-    ID3DX11Effect* mFX;
+ 
     ID3D11InputLayout*      pInputLayout;
     ID3D11Buffer*           pVertexBuffer;
 
-    ID3DX11EffectTechnique* mTech;
-    ID3DX11EffectMatrixVariable* mfxWorldViewProj;
+	dx11::HlslEffect effect;
 };
 
 CINDER_APP_BASIC( BasicApp, RendererDX11)

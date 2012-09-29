@@ -22,15 +22,22 @@
 #include "cinder/PolyLine.h"
 #include "cinder/AxisAlignedBox.h"
 #include "cinder/Camera.h"
-#include "dx11/d3dx11effect.h"
+
+#include "d3dx11effect.h"
 
 #ifdef _DEBUG
 #ifndef V
 #define V(x)           { hr = (x); if( FAILED(hr) ) { DXTrace( __FILE__, (DWORD)__LINE__, hr, L#x, true ); } }
 #endif
+#ifndef V_RETURN
+#define V_RETURN(x)    { hr = (x); if( FAILED(hr) ) { return DXTrace( __FILE__, (DWORD)__LINE__, hr, L#x, true ); } }
+#endif
 #else
 #ifndef V
 #define V(x)           { hr = (x); }
+#endif
+#ifndef V_RETURN
+#define V_RETURN(x)    { hr = (x); if( FAILED(hr) ) { return hr; } }
 #endif
 #endif
 
@@ -80,18 +87,20 @@ ID3D11DeviceContext* getImmediateContext();
 //! Clears the DX9 color buffer using \a color and optionally clears the depth buffer when \a clearDepthBuffer
 void clear( const ColorA &color = ColorA::black(), bool clearDepthBuffer = true, float clearZValue = 1.0f);
 
-HRESULT compileShaderFromFile(const WCHAR* szFileName, LPCSTR szEntryPoint, LPCSTR szShaderModel, ID3DBlob** ppBlobOut );
+HRESULT compileShader(const WCHAR* szFileName, LPCSTR szEntryPoint, LPCSTR szShaderModel, ID3DBlob** ppBlobOut );
 
-HRESULT createShaderFromPath(const fs::path& filePath, const char* entryName, const char* profileName, 
+HRESULT compileShader(const Buffer& data, LPCSTR szEntryPoint, LPCSTR szShaderModel, ID3DBlob** ppBlobOut );
+
+HRESULT createShader(DataSourceRef datasrc, const char* entryName, const char* profileName, 
 	ID3D11VertexShader** pVertexShader, ID3DBlob** pBlobOut = NULL);
 
-HRESULT createShaderFromPath(const fs::path& filePath, const char* entryName, const char* profileName, ID3D11PixelShader** pPixelShader);
+HRESULT createShader(DataSourceRef datasrc, const char* entryName, const char* profileName, ID3D11PixelShader** pPixelShader);
 
-HRESULT createEffectFromPath(const fs::path& filePath, ID3DX11Effect** pEffect);
+HRESULT createEffect(DataSourceRef datasrc, ID3DX11Effect** pEffect);
 
 void drawWithTechnique(ID3DX11EffectTechnique* tech, UINT VertexCount, UINT StartVertexLocation);
 
-void drawIndexedWithTechnique(ID3DX11EffectTechnique* tech, UINT VertexCount, UINT StartVertexLocation, INT BaseVertexLocation);
+void drawIndexedWithTechnique(struct ID3DX11EffectTechnique* tech, UINT VertexCount, UINT StartVertexLocation, INT BaseVertexLocation);
 
 void blendFunction(D3D11_BLEND  src, D3D11_BLEND dst);
 

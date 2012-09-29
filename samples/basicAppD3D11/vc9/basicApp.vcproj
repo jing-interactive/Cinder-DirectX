@@ -194,6 +194,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\src\dx11\HlslEffect.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\include\dx11\HlslEffect.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\src\dx11\RendererDx11.cpp"
 				>
 			</File>

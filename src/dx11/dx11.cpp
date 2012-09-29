@@ -45,7 +45,38 @@ void clear( const ColorA &color, bool clearDepthBuffer, float clearZ)
 }
 
 
-HRESULT compileShaderFromFile(const WCHAR* szFileName, LPCSTR szEntryPoint, LPCSTR szShaderModel, ID3DBlob** ppBlobOut )
+HRESULT compileShader( const Buffer& data, LPCSTR szEntryPoint, LPCSTR szShaderModel, ID3DBlob** ppBlobOut )
+{
+	HRESULT hr = S_OK;
+
+	DWORD dwShaderFlags = D3DCOMPILE_ENABLE_STRICTNESS;
+#if defined( DEBUG ) || defined( _DEBUG )
+	// Set the D3DCOMPILE_DEBUG flag to embed debug information in the shaders.
+	// Setting this flag improves the shader debugging experience, but still allows 
+	// the shaders to be optimized and to run exactly the way they will run in 
+	// the release configuration of this program.
+	dwShaderFlags |= D3DCOMPILE_DEBUG;
+#endif
+
+	// compiling
+	ID3DBlob* pErrorBlob = NULL;
+
+	hr = D3DCompile( data.getData(), data.getDataSize(), NULL,
+		NULL, NULL,
+		szEntryPoint, szShaderModel, 
+		dwShaderFlags, 0, 
+		ppBlobOut, &pErrorBlob);
+	if( FAILED(hr) )
+	{
+		if( pErrorBlob != NULL )
+			OutputDebugStringA( (char*)pErrorBlob->GetBufferPointer() );
+	}
+	SAFE_RELEASE(pErrorBlob);
+
+	return hr;
+}
+
+HRESULT compileShader(const WCHAR* szFileName, LPCSTR szEntryPoint, LPCSTR szShaderModel, ID3DBlob** ppBlobOut )
 {
     HRESULT hr = S_OK;
 
@@ -98,13 +129,13 @@ HRESULT compileShaderFromFile(const WCHAR* szFileName, LPCSTR szEntryPoint, LPCS
     return hr;
 }
 
-HRESULT createShaderFromPath(const fs::path& filePath, const char* entryName, const char* profileName, 
+HRESULT createShader(DataSourceRef datasrc, const char* entryName, const char* profileName, 
 	ID3D11VertexShader** pVertexShader, ID3DBlob** pBlobOut)
 {
     HRESULT hr = E_FAIL;
-	if (!filePath.empty()){
+	if (datasrc->getBuffer().getDataSize() > 0){
 		ID3DBlob* pShaderBlob = NULL;
-		V(dx11::compileShaderFromFile(filePath.c_str(), entryName, profileName, &pShaderBlob ));
+		V(dx11::compileShader(datasrc->getBuffer(), entryName, profileName, &pShaderBlob ));
 
 		V(dx11::getDevice()->CreateVertexShader( pShaderBlob->GetBufferPointer(), pShaderBlob->GetBufferSize(), NULL, pVertexShader));
 
@@ -118,12 +149,12 @@ HRESULT createShaderFromPath(const fs::path& filePath, const char* entryName, co
 	return hr;
 }
 
-HRESULT createShaderFromPath(const fs::path& filePath, const char* entryName, const char* profileName, ID3D11PixelShader** pPixelShader)
+HRESULT createShader(DataSourceRef datasrc, const char* entryName, const char* profileName, ID3D11PixelShader** pPixelShader)
 {
     HRESULT hr = E_FAIL;
-	if (!filePath.empty()){
+	if (datasrc->getBuffer().getDataSize() > 0){
 		ID3DBlob* pShaderBlob = NULL;
-		V(dx11::compileShaderFromFile(filePath.c_str(), entryName, profileName, &pShaderBlob ));
+		V(dx11::compileShader(datasrc->getBuffer(), entryName, profileName, &pShaderBlob ));
 
 		V(dx11::getDevice()->CreatePixelShader( pShaderBlob->GetBufferPointer(), pShaderBlob->GetBufferSize(),
 			NULL, pPixelShader));
@@ -132,12 +163,12 @@ HRESULT createShaderFromPath(const fs::path& filePath, const char* entryName, co
 	return hr;
 }
 
-HRESULT createEffectFromPath(const fs::path& filePath, ID3DX11Effect** pEffect)
+HRESULT createEffect(DataSourceRef datasrc, ID3DX11Effect** pEffect)
 {
     HRESULT hr = E_FAIL;
-	if (!filePath.empty()){
+	if (datasrc->getBuffer().getDataSize() > 0){
 		ID3DBlob* pShaderBlob = NULL;
-		V(dx11::compileShaderFromFile(filePath.c_str(), "None", "fx_5_0", &pShaderBlob ));
+		V(dx11::compileShader(datasrc->getBuffer(), "None", "fx_5_0", &pShaderBlob ));
 
 		V(D3DX11CreateEffectFromMemory(pShaderBlob->GetBufferPointer(),pShaderBlob->GetBufferSize(),
 			0,	dx11::getDevice(),pEffect));
