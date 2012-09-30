@@ -22,6 +22,7 @@
 
 #include "dx11/dx11.h"
 #include "dx11/HlslEffect.h"
+#include "cinder/app/App.h"
 
 using namespace std;
 
@@ -39,6 +40,9 @@ HlslEffect::Obj::~Obj()
 {
 	HRESULT hr = S_OK;
 	V(dx11::createEffect(effect, &mObj->mHandle));
+	mObj->mCurrentTech = mObj->mHandle->GetTechniqueByIndex(0);
+	if (!mObj->mCurrentTech->IsValid())
+		app::console()<<"There is no valid technique inside"<<endl;
 }
  
 void HlslEffect::uniform( const std::string &name, int data )
@@ -169,38 +173,37 @@ ID3DX11EffectTechnique* HlslEffect::getTechnique( const std::string &name )
 		return it->second;
 }
 
-HRESULT HlslEffect::createInputLayout(const std::string &techniqueName, const D3D11_INPUT_ELEMENT_DESC *pInputElementDescs, 
+HRESULT HlslEffect::createInputLayout(const D3D11_INPUT_ELEMENT_DESC *pInputElementDescs, 
 									  UINT NumElements,ID3D11InputLayout **ppInputLayout, int pass)
 {
 	HRESULT hr = S_OK;
 	D3DX11_PASS_DESC passDesc;
 
-	ID3DX11EffectTechnique* tech = getTechnique(techniqueName);
-	if (tech == NULL)
+	if (!mObj->mCurrentTech->IsValid())
 		return E_FAIL;
-	tech->GetPassByIndex(0)->GetDesc(&passDesc);
+	mObj->mCurrentTech->GetPassByIndex(pass)->GetDesc(&passDesc);
 
 	V_RETURN(dx11::getDevice()->CreateInputLayout(pInputElementDescs, NumElements, passDesc.pIAInputSignature, 
 		passDesc.IAInputSignatureSize, ppInputLayout));
 }
 
-void HlslEffect::draw( const std::string &techniqueName, UINT VertexCount, UINT StartVertexLocation )
+void HlslEffect::draw(UINT VertexCount, UINT StartVertexLocation )
 {
-	ID3DX11EffectTechnique* tech = getTechnique(techniqueName);
-	if (tech)
-	{
-		dx11::drawWithTechnique(tech, VertexCount, StartVertexLocation);
-	}
+	dx11::drawWithTechnique(mObj->mCurrentTech, VertexCount, StartVertexLocation);
 }
 
-void HlslEffect::drawIndexed( const std::string &techniqueName, UINT VertexCount, UINT StartVertexLocation, INT BaseVertexLocation )
+void HlslEffect::drawIndexed(UINT VertexCount, UINT StartVertexLocation, INT BaseVertexLocation )
 {
-	ID3DX11EffectTechnique* tech = getTechnique(techniqueName);
-	if (tech)
-	{
-		dx11::drawIndexedWithTechnique(tech, VertexCount, StartVertexLocation, BaseVertexLocation);
-	}
+	dx11::drawIndexedWithTechnique(mObj->mCurrentTech, VertexCount, StartVertexLocation, BaseVertexLocation);
 }
+
+void HlslEffect::useTechnique( const std::string &name )
+{
+	ID3DX11EffectTechnique* tech = getTechnique(name);
+	if (tech->IsValid())
+		mObj->mCurrentTech = tech;
+}
+
 
 
 

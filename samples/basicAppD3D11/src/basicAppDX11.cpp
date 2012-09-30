@@ -24,7 +24,7 @@ public:
 			effect = dx11::HlslEffect(loadAsset(L"color.fx"));
 
 	        // Create the input layout 
-            V(effect.createInputLayout("ColorTech", dx11::VertexPC::InputElements, 
+            V(effect.createInputLayout(dx11::VertexPC::InputElements, 
 				dx11::VertexPC::InputElementCount,	&pInputLayout));
         }
 
@@ -78,10 +78,8 @@ public:
         Matrix44f MVP = P*V*W;
 		effect.uniform("gWorldViewProj", MVP);
 
-        // Set primitive topology
         dx11::getImmediateContext()->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
-  //      dx11::drawWithTechnique(mTech, 3, 0);
-		effect.draw("ColorTech", 3, 0);
+		effect.draw(3, 0);
     }
 
     void resize( ResizeEvent event )

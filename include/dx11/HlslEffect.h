@@ -43,12 +43,14 @@ class HlslEffect {
   public: 
 	HlslEffect() {}
 	HlslEffect( DataSourceRef effect);
-   
-	HRESULT createInputLayout(const std::string &techniqueName, const D3D11_INPUT_ELEMENT_DESC *pInputElementDescs, 
+
+	void	useTechnique(const std::string &name);
+
+	HRESULT createInputLayout(const D3D11_INPUT_ELEMENT_DESC *pInputElementDescs, 
 		UINT NumElements,ID3D11InputLayout **ppInputLayout, int pass = 0);
 
-	void draw(const std::string &techniqueName, UINT VertexCount, UINT StartVertexLocation);
-	void drawIndexed(const std::string &techniqueName, UINT VertexCount, UINT StartVertexLocation, INT BaseVertexLocation);
+	void draw(UINT VertexCount, UINT StartVertexLocation = 0);
+	void drawIndexed(UINT VertexCount, UINT StartVertexLocation = 0, INT BaseVertexLocation = 0);
 
 	void	uniform( const std::string &name, int data );
 	void	uniform( const std::string &name, const Vec2i &data );
@@ -67,6 +69,7 @@ class HlslEffect {
 	void	uniform( const std::string &name, const Vec3f *data, int count );
 	void	uniform( const std::string &name, const Vec4f *data, int count );
 
+
   protected:
 	  
 	ID3DX11EffectVariable* getVariable(const std::string &name);
@@ -74,13 +77,14 @@ class HlslEffect {
 	ID3DX11EffectTechnique* getTechnique(const std::string &name);
 
 	struct Obj {
-		Obj() : mHandle( 0 ) {}
+		Obj() : mHandle( 0 ), mCurrentTech(0) {}
 		~Obj();
 		
 		ID3DX11Effect* mHandle;
 		std::map<std::string,ID3DX11EffectVariable*>	mVarableLocs;
 		std::map<std::string,ID3DX11EffectConstantBuffer*>	mConstBufferLocs;
 		std::map<std::string,ID3DX11EffectTechnique*>	mTechniqueLocs;
+		ID3DX11EffectTechnique*							mCurrentTech;
 	};
  
 	std::shared_ptr<Obj>	mObj;
