@@ -7,6 +7,7 @@
 #include "dx11/DDSTextureLoader.h"
 #include "dx11/VertexTypes.h"
 #include "dx11/HlslEffect.h"
+#include "dx11/SimpleVertexBuffer.h"
 
 using namespace ci;
 using namespace ci::app; 
@@ -22,10 +23,7 @@ public:
     {
         {// Create Effect
 			effect = dx11::HlslEffect(loadAsset(L"color.fx"));
-
-	        // Create the input layout 
-            V(effect.createInputLayout(dx11::VertexPC::InputElements, 
-				dx11::VertexPC::InputElementCount,	&pInputLayout));
+			VertexBufferPC.createInputLayout(effect);
         }
 
         {// Create vertex buffer
@@ -35,19 +33,14 @@ public:
                 dx11::VertexPC(Vec3f( 0.5f, -0.5f, 0.0f ),ColorA( 0,1,0,1)),
                 dx11::VertexPC(Vec3f( -0.5f, -0.5f, 0.0f),ColorA(0,0,1,1)),
             };
-            CD3D11_BUFFER_DESC bd(sizeof(vertices), D3D11_BIND_VERTEX_BUFFER);
-
-            D3D11_SUBRESOURCE_DATA InitData = {0};
-            InitData.pSysMem = vertices;
-            V(dx11::getDevice()->CreateBuffer( &bd, &InitData, &pVertexBuffer ));
+			VertexBufferPC.createBuffer(vertices, ARRAYSIZE(vertices));
         }
     }
 
     void destroy()
     {
 		effect.reset();
-        SAFE_RELEASE(pInputLayout);
-        SAFE_RELEASE(pVertexBuffer);
+        VertexBufferPC.reset();
     }
 
     void keyDown( KeyEvent event )
@@ -65,20 +58,15 @@ public:
     void draw()
     {
         dx11::clear(ColorA(0.5f, 0.5f, 0.5f));
-        dx11::getImmediateContext()->IASetInputLayout(pInputLayout);
 
-        UINT stride = sizeof( dx11::VertexPC);
-        UINT offset = 0;
-        dx11::getImmediateContext()->IASetVertexBuffers( 0, 1, &pVertexBuffer, &stride, &offset );
+		VertexBufferPC.bind();
 
-        // Set const
 		Matrix44f W = Matrix44f::identity();
         Matrix44f V = mCam.getModelViewMatrix();
         Matrix44f P = mCam.getProjectionMatrix();
         Matrix44f MVP = P*V*W;
 		effect.uniform("gWorldViewProj", MVP);
 
-        dx11::getImmediateContext()->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
 		effect.draw(3, 0);
     }
 
@@ -90,9 +78,8 @@ public:
 
 private: 
 	dx11::CameraPerspDX	mCam;
- 
-    ID3D11InputLayout*      pInputLayout;
-    ID3D11Buffer*           pVertexBuffer;
+
+	dx11::SimpleVertexBuffer<dx11::VertexPC>	VertexBufferPC;
 
 	dx11::HlslEffect effect;
 };
