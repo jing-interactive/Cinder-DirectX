@@ -39,8 +39,7 @@ public:
 
     void destroy()
     {
-		effect.reset();
-        VertexBufferPC.reset();
+
     }
 
     void keyDown( KeyEvent event )

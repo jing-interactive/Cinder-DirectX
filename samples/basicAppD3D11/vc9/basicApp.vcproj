@@ -239,22 +239,6 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\assets\Tutorial02.fx"
-				>
-			</File>
-			<File
-				RelativePath="..\assets\Tutorial03.fx"
-				>
-			</File>
-			<File
-				RelativePath="..\assets\Tutorial04.fx"
-				>
-			</File>
-			<File
-				RelativePath="..\assets\Tutorial05.fx"
-				>
-			</File>
-			<File
 				RelativePath="..\assets\Tutorial06.fx"
 				>
 			</File>
