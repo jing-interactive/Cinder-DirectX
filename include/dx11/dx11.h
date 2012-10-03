@@ -51,21 +51,6 @@
 #define SAFE_RELEASE(p)      { if (p) { (p)->Release(); (p)=NULL; } }
 #endif
 
-// for intrusive_ptr usage
-namespace boost
-{
-    inline void intrusive_ptr_add_ref(IUnknown * p)
-    {
-        assert(p);
-        p->AddRef();
-    }
-    inline void intrusive_ptr_release(IUnknown * p)
-    {
-        assert(p);
-        p->Release();
-    }
-};
-
 // forward declarations
 namespace cinder {
 	class Camera; class TriMesh2d; class TriMesh; class Sphere;
