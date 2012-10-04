@@ -38,6 +38,12 @@
 
 namespace cinder { namespace dx11 {
 
+HRESULT createEffect(DataSourceRef datasrc, ID3DX11Effect** pEffect);
+
+void drawWithTechnique(ID3DX11EffectTechnique* tech, UINT VertexCount, UINT StartVertexLocation);
+
+void drawIndexedWithTechnique(ID3DX11EffectTechnique* tech, UINT IndexCount, UINT StartVertexLocation, INT BaseVertexLocation);
+
 //! Represents an Hlsl Effect. \ImplShared
 class HlslEffect {
   public: 
@@ -50,7 +56,7 @@ class HlslEffect {
 		UINT NumElements,ID3D11InputLayout **ppInputLayout, int pass = 0);
 
 	void draw(UINT VertexCount, UINT StartVertexLocation = 0);
-	void drawIndexed(UINT VertexCount, UINT StartVertexLocation = 0, INT BaseVertexLocation = 0);
+	void drawIndexed(UINT IndexCount, UINT StartVertexLocation = 0, INT BaseVertexLocation = 0);
 
 	void	uniform( const std::string &name, int data );
 	void	uniform( const std::string &name, const Vec2i &data );

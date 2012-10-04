@@ -1,13 +1,10 @@
 #include "cinder/app/AppBasic.h"
 #include "cinder/Utilities.h"
-#include "cinder/Rand.h"
 #include "dx11/RendererDx11.h"
 #include "dx11/dx11.h"
-#include <boost/intrusive_ptr.hpp>
-#include "dx11/DDSTextureLoader.h"
 #include "dx11/VertexTypes.h"
 #include "dx11/HlslEffect.h"
-#include "dx11/SimpleVertexBuffer.h"
+#include "dx11/Vbo.h"
 
 using namespace ci;
 using namespace ci::app; 
@@ -21,10 +18,7 @@ private:
 public:
     void setup()
     {
-        {// Create Effect
-			effect = dx11::HlslEffect(loadAsset(L"color.fx"));
-			VertexBufferPC.createInputLayout(effect);
-        }
+		effect = dx11::HlslEffect(loadAsset(L"color.fx"));
 
         {// Create vertex buffer
             dx11::VertexPC vertices[] =
@@ -33,7 +27,8 @@ public:
                 dx11::VertexPC(Vec3f( 0.5f, -0.5f, 0.0f ),ColorA( 0,1,0,1)),
                 dx11::VertexPC(Vec3f( -0.5f, -0.5f, 0.0f),ColorA(0,0,1,1)),
             };
-			VertexBufferPC.createBuffer(vertices, ARRAYSIZE(vertices));
+			VertexBufferPC.createBuffer<dx11::VertexPC>(vertices, ARRAYSIZE(vertices));
+			VertexBufferPC.createInputLayout(effect);
         }
     }
 
@@ -78,7 +73,7 @@ public:
 private: 
 	dx11::CameraPerspDX	mCam;
 
-	dx11::SimpleVertexBuffer<dx11::VertexPC>	VertexBufferPC;
+	dx11::VboMesh VertexBufferPC;
 
 	dx11::HlslEffect effect;
 };

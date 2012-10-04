@@ -81,12 +81,6 @@ HRESULT createShader(DataSourceRef datasrc, const char* entryName, const char* p
 
 HRESULT createShader(DataSourceRef datasrc, const char* entryName, const char* profileName, ID3D11PixelShader** pPixelShader);
 
-HRESULT createEffect(DataSourceRef datasrc, ID3DX11Effect** pEffect);
-
-void drawWithTechnique(ID3DX11EffectTechnique* tech, UINT VertexCount, UINT StartVertexLocation);
-
-void drawIndexedWithTechnique(struct ID3DX11EffectTechnique* tech, UINT VertexCount, UINT StartVertexLocation, INT BaseVertexLocation);
-
 void blendFunction(D3D11_BLEND  src, D3D11_BLEND dst);
 
 //! Enables or disables wait for vertical sync

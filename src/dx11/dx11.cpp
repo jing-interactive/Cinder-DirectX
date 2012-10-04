@@ -14,6 +14,7 @@
 #include "cinder/Path2d.h"
 #include "cinder/Shape2d.h"
 #include "cinder/Triangulate.h"
+#include "cinder/app/App.h"
 
 namespace{
 HRESULT hr = S_OK;
@@ -45,6 +46,117 @@ void clear( const ColorA &color, bool clearDepthBuffer, float clearZ)
 }
 
 
+//--------------------------------------------------------------------------------------
+// Use this until D3DX11 comes online and we get some compilation helpers
+//--------------------------------------------------------------------------------------
+static const unsigned int MAX_INCLUDES = 9;
+struct sInclude
+{
+	HANDLE         hFile;
+	HANDLE         hFileMap;
+	LARGE_INTEGER  FileSize;
+	void           *pMapData;
+};
+
+class CIncludeHandler : public ID3DInclude
+{
+private:
+	struct sInclude   m_includeFiles[MAX_INCLUDES];
+	unsigned int      m_nIncludes;
+	std::vector<DataSourceRef>	m_dataSourceRefs;
+
+public:
+	CIncludeHandler()
+	{
+		// array initialization
+		for ( unsigned int i=0; i<MAX_INCLUDES; i++)
+		{
+			m_includeFiles[i].hFile = INVALID_HANDLE_VALUE;
+			m_includeFiles[i].hFileMap = INVALID_HANDLE_VALUE;
+			m_includeFiles[i].pMapData = NULL;
+		}
+		m_nIncludes = 0;
+	}
+	~CIncludeHandler()
+	{
+		for (unsigned int i=0; i<m_nIncludes; i++)
+		{
+			UnmapViewOfFile( m_includeFiles[i].pMapData );
+
+			if ( m_includeFiles[i].hFileMap != INVALID_HANDLE_VALUE)
+				CloseHandle( m_includeFiles[i].hFileMap );
+
+			if ( m_includeFiles[i].hFile != INVALID_HANDLE_VALUE)
+				CloseHandle( m_includeFiles[i].hFile );
+		}
+
+		m_nIncludes = 0;
+	}
+
+	STDMETHOD(Open(
+		D3D_INCLUDE_TYPE IncludeType,
+		LPCSTR pFileName,
+		LPCVOID pParentData,
+		LPCVOID *ppData,
+		UINT *pBytes
+		))
+	{
+#if 1
+		DataSourceRef dataSource = app::loadAsset(pFileName);
+		if (dataSource->getBuffer().getDataSize() > 0)
+		{
+			*ppData = dataSource->getBuffer().getData();
+			*pBytes = dataSource->getBuffer().getDataSize();
+			m_dataSourceRefs.push_back(dataSource);
+		}
+		else
+		{
+			return E_FAIL;
+		}
+#else
+		unsigned int   incIndex = m_nIncludes+1;
+
+		// Make sure we have enough room for this include file
+		if ( incIndex >= MAX_INCLUDES )
+			return E_FAIL;
+
+		// try to open the file
+		m_includeFiles[incIndex].hFile  = CreateFileA( pFileName, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING,
+			FILE_FLAG_SEQUENTIAL_SCAN, NULL );
+		if( INVALID_HANDLE_VALUE == m_includeFiles[incIndex].hFile )
+		{
+			return E_FAIL;
+		}
+
+		// Get the file size
+		GetFileSizeEx( m_includeFiles[incIndex].hFile, &m_includeFiles[incIndex].FileSize );
+
+		// Use Memory Mapped File I/O for the header data
+		m_includeFiles[incIndex].hFileMap = CreateFileMappingA( m_includeFiles[incIndex].hFile, NULL, PAGE_READONLY, m_includeFiles[incIndex].FileSize.HighPart, m_includeFiles[incIndex].FileSize.LowPart, pFileName);
+		if( m_includeFiles[incIndex].hFileMap == NULL  )
+		{
+			if (m_includeFiles[incIndex].hFile != INVALID_HANDLE_VALUE)
+				CloseHandle( m_includeFiles[incIndex].hFile );
+			return E_FAIL;
+		}
+
+		// Create Map view
+		*ppData = MapViewOfFile( m_includeFiles[incIndex].hFileMap, FILE_MAP_READ, 0, 0, 0 );
+		*pBytes = m_includeFiles[incIndex].FileSize.LowPart;
+
+		// Success - Increment the include file count
+		m_nIncludes= incIndex;
+#endif
+		return S_OK;
+	}
+
+	STDMETHOD(Close( LPCVOID pData ))
+	{
+		// Defer Closure until the container destructor 
+		return S_OK;
+	}
+};
+
 HRESULT compileShader( const Buffer& data, LPCSTR szEntryPoint, LPCSTR szShaderModel, ID3DBlob** ppBlobOut )
 {
 	HRESULT hr = S_OK;
@@ -61,8 +173,10 @@ HRESULT compileShader( const Buffer& data, LPCSTR szEntryPoint, LPCSTR szShaderM
 	// compiling
 	ID3DBlob* pErrorBlob = NULL;
 
+	CIncludeHandler includeHandler;
+
 	hr = D3DCompile( data.getData(), data.getDataSize(), NULL,
-		NULL, NULL,
+		NULL, &includeHandler,
 		szEntryPoint, szShaderModel, 
 		dwShaderFlags, 0, 
 		ppBlobOut, &pErrorBlob);
@@ -161,44 +275,6 @@ HRESULT createShader(DataSourceRef datasrc, const char* entryName, const char* p
 		SAFE_RELEASE(pShaderBlob);
 	}
 	return hr;
-}
-
-HRESULT createEffect(DataSourceRef datasrc, ID3DX11Effect** pEffect)
-{
-    HRESULT hr = E_FAIL;
-	if (datasrc->getBuffer().getDataSize() > 0){
-		ID3DBlob* pShaderBlob = NULL;
-		V(dx11::compileShader(datasrc->getBuffer(), "None", "fx_5_0", &pShaderBlob ));
-
-		V(D3DX11CreateEffectFromMemory(pShaderBlob->GetBufferPointer(),pShaderBlob->GetBufferSize(),
-			0,	dx11::getDevice(),pEffect));
-		SAFE_RELEASE(pShaderBlob);
-	}
-	return hr;
-}
-
-void drawWithTechnique(ID3DX11EffectTechnique* tech, UINT VertexCount, UINT StartVertexLocation)
-{
-    HRESULT hr = S_OK;
-    D3DX11_TECHNIQUE_DESC techDesc;
-    tech->GetDesc( &techDesc );
-    for(UINT p = 0; p < techDesc.Passes; ++p)
-    {
-        tech->GetPassByIndex(p)->Apply(0, getImmediateContext());
-	    getImmediateContext()->Draw(VertexCount, StartVertexLocation);
-    }
-}
-
-void drawIndexedWithTechnique(ID3DX11EffectTechnique* tech, UINT VertexCount, UINT StartVertexLocation, INT BaseVertexLocation)
-{
-    HRESULT hr = S_OK;
-    D3DX11_TECHNIQUE_DESC techDesc;
-    tech->GetDesc( &techDesc );
-    for(UINT p = 0; p < techDesc.Passes; ++p)
-    {
-        tech->GetPassByIndex(p)->Apply(0, getImmediateContext());
-	    getImmediateContext()->DrawIndexed(VertexCount, StartVertexLocation, BaseVertexLocation);
-    }
 }
 
 void setModelView( const Camera &cam )

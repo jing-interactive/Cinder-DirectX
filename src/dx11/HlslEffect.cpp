@@ -28,6 +28,44 @@ using namespace std;
 
 namespace cinder { namespace dx11 {
 
+HRESULT createEffect(DataSourceRef datasrc, ID3DX11Effect** pEffect)
+{
+	HRESULT hr = E_FAIL;
+	if (datasrc->getBuffer().getDataSize() > 0){
+		ID3DBlob* pShaderBlob = NULL;
+		V(dx11::compileShader(datasrc->getBuffer(), "None", "fx_5_0", &pShaderBlob ));
+
+		V(D3DX11CreateEffectFromMemory(pShaderBlob->GetBufferPointer(),pShaderBlob->GetBufferSize(),
+			0,	dx11::getDevice(),pEffect));
+		SAFE_RELEASE(pShaderBlob);
+	}
+	return hr;
+}
+
+void drawWithTechnique(ID3DX11EffectTechnique* tech, UINT VertexCount, UINT StartVertexLocation)
+{
+	HRESULT hr = S_OK;
+	D3DX11_TECHNIQUE_DESC techDesc;
+	tech->GetDesc( &techDesc );
+	for(UINT p = 0; p < techDesc.Passes; ++p)
+	{
+		tech->GetPassByIndex(p)->Apply(0, getImmediateContext());
+		getImmediateContext()->Draw(VertexCount, StartVertexLocation);
+	}
+}
+
+void drawIndexedWithTechnique(ID3DX11EffectTechnique* tech, UINT IndexCount, UINT StartVertexLocation, INT BaseVertexLocation)
+{
+	HRESULT hr = S_OK;
+	D3DX11_TECHNIQUE_DESC techDesc;
+	tech->GetDesc( &techDesc );
+	for(UINT p = 0; p < techDesc.Passes; ++p)
+	{
+		tech->GetPassByIndex(p)->Apply(0, getImmediateContext());
+		getImmediateContext()->DrawIndexed(IndexCount, StartVertexLocation, BaseVertexLocation);
+	}
+}
+
 HlslEffect::Obj::~Obj()
 {
 	SAFE_RELEASE(mHandle);
@@ -185,6 +223,8 @@ HRESULT HlslEffect::createInputLayout(const D3D11_INPUT_ELEMENT_DESC *pInputElem
 
 	V_RETURN(dx11::getDevice()->CreateInputLayout(pInputElementDescs, NumElements, passDesc.pIAInputSignature, 
 		passDesc.IAInputSignatureSize, ppInputLayout));
+
+	return hr;
 }
 
 void HlslEffect::draw(UINT VertexCount, UINT StartVertexLocation )
@@ -192,9 +232,9 @@ void HlslEffect::draw(UINT VertexCount, UINT StartVertexLocation )
 	dx11::drawWithTechnique(mObj->mCurrentTech, VertexCount, StartVertexLocation);
 }
 
-void HlslEffect::drawIndexed(UINT VertexCount, UINT StartVertexLocation, INT BaseVertexLocation )
+void HlslEffect::drawIndexed(UINT IndexCount, UINT StartVertexLocation, INT BaseVertexLocation )
 {
-	dx11::drawIndexedWithTechnique(mObj->mCurrentTech, VertexCount, StartVertexLocation, BaseVertexLocation);
+	dx11::drawIndexedWithTechnique(mObj->mCurrentTech, IndexCount, StartVertexLocation, BaseVertexLocation);
 }
 
 void HlslEffect::useTechnique( const std::string &name )

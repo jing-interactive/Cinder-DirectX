@@ -77,12 +77,12 @@ struct VertexPN
 
 
 // Vertex struct holding position, color, and texture mapping information.
-struct VertexPCTexture
+struct VertexPCT
 {
-    VertexPCTexture()
+    VertexPCT()
     { }
 
-    VertexPCTexture(const Vec3f& position, const ColorA& color, const Vec2f& texCoord)
+    VertexPCT(const Vec3f& position, const ColorA& color, const Vec2f& texCoord)
         : position(position),
         color(color),
         texCoord(texCoord)
