@@ -178,6 +178,14 @@
 			Name="dx11"
 			>
 			<File
+				RelativePath="..\..\..\src\dx11\DDSTextureLoader.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\include\dx11\DDSTextureLoader.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\src\dx11\dx11.cpp"
 				>
 			</File>
@@ -203,6 +211,14 @@
 			</File>
 			<File
 				RelativePath="..\..\..\include\dx11\RendererDx11.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\dx11\Texture.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\include\dx11\Texture.h"
 				>
 			</File>
 			<File

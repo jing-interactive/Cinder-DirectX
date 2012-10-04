@@ -4,6 +4,7 @@
 #include "dx11/VertexTypes.h"
 #include "dx11/Vbo.h"
 #include "dx11/LightHelper.h"
+#include "dx11/Texture.h"
 
 using namespace ci;
 using namespace ci::app; 
@@ -22,6 +23,8 @@ public:
 		duck.read(loadAsset("ducky.msh"));
 		vboDuck = dx11::VboMesh(duck);
 		vboDuck.createInputLayout(effect);
+
+		texDuck = dx11::Texture(loadImage(loadAsset("ducky.png")));
 
 		mTransform.setToIdentity();
     }
@@ -74,6 +77,7 @@ private:
 	Matrix44f mTransform;
 	TriMesh	duck;
 	dx11::VboMesh	vboDuck;
+	dx11::Texture	texDuck;
 
 	dx11::HlslEffect effect;
 };
