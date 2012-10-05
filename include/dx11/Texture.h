@@ -1,6 +1,6 @@
 #pragma once
 
-#include <D3D11.h>
+#include "dx11/dx11.h"
 #include "cinder/Cinder.h"
 #include "cinder/Surface.h"
 
@@ -10,9 +10,9 @@ class Texture
 {
 private:
 	struct Obj {
-		Obj() : mSrv(NULL),mWidth(-1),mHeight(-1),mInternalFormat(DXGI_FORMAT_UNKNOWN){}
+		Obj() : mSRV(NULL),mWidth(-1),mHeight(-1),mInternalFormat(DXGI_FORMAT_UNKNOWN){}
 		~Obj();
-		ID3D11ShaderResourceView* mSrv;
+		ID3D11ShaderResourceView* mSRV;
 		int mWidth;
 		int mHeight;
 		DXGI_FORMAT mInternalFormat;
@@ -25,8 +25,16 @@ public:
 
 	Texture( ImageSourceRef imageSource);
 
+	int getWidth() const;
+	int getHeight() const;
+
+	operator ID3D11ShaderResourceView*() const { return mObj->mSRV; }
+
 protected:
 	void	init( ImageSourceRef imageSource);	
+
+	HRESULT	init(const void* pBitData);
+
 public:
 	//@{
 	//! Emulates shared_ptr-like behavior

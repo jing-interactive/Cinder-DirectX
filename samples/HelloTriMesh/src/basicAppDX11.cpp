@@ -5,6 +5,7 @@
 #include "dx11/Vbo.h"
 #include "dx11/LightHelper.h"
 #include "dx11/Texture.h"
+#include "cinder/ImageIo.h"
 
 using namespace ci;
 using namespace ci::app; 
@@ -36,7 +37,8 @@ public:
 
 	void keyDown( KeyEvent event )
 	{
-		quit();
+		if (event.getCode() == KeyEvent::KEY_ESCAPE)
+			quit();
 	}
 
 	void update()
@@ -61,6 +63,7 @@ public:
         Matrix44f WVP = P*V*W;
 		effect.uniform("gWorld", W);
 		effect.uniform("gWorldViewProj", WVP);
+		effect.uniform("gDiffuseMap", texDuck);
 
 		effect.drawIndexed(duck.getNumIndices(), 0);
     }

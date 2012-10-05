@@ -187,11 +187,23 @@ void HlslEffect::uniform( const std::string &name, const Matrix44f &data, bool t
 	//glUniformMatrix4fv( loc, 1, ( transpose ) ? GL_TRUE : GL_FALSE, data.m );
 }
 
+void HlslEffect::uniform( const std::string &name, ID3D11ShaderResourceView* pSRV )
+{
+	ID3DX11EffectVariable* var = getVariable( name );
+	if (var){
+		ID3DX11EffectShaderResourceVariable* varSRV = var->AsShaderResource();
+		varSRV->SetResource(pSRV);
+	}
+}
+
+
 ID3DX11EffectVariable* HlslEffect::getVariable( const std::string &name )
 {
 	map<string,ID3DX11EffectVariable*>::const_iterator it = mObj->mVarableLocs.find( name );
 	if( it == mObj->mVarableLocs.end() ) {
 		ID3DX11EffectVariable* var = mObj->mHandle->GetVariableByName(name.c_str());
+		if (!var->IsValid())
+			return NULL;
 		mObj->mVarableLocs[name] = var;
 		return var;
 	}
@@ -204,6 +216,8 @@ ID3DX11EffectTechnique* HlslEffect::getTechnique( const std::string &name )
 	map<string,ID3DX11EffectTechnique*>::const_iterator it = mObj->mTechniqueLocs.find( name );
 	if( it == mObj->mTechniqueLocs.end() ) {
 		ID3DX11EffectTechnique* tech = mObj->mHandle->GetTechniqueByName(name.c_str());
+		if (!tech->IsValid())
+			return NULL;
 		mObj->mTechniqueLocs[name] = tech;
 		return tech;
 	}
@@ -240,7 +254,7 @@ void HlslEffect::drawIndexed(UINT IndexCount, UINT StartVertexLocation, INT Base
 void HlslEffect::useTechnique( const std::string &name )
 {
 	ID3DX11EffectTechnique* tech = getTechnique(name);
-	if (tech->IsValid())
+	if (tech != NULL)
 		mObj->mCurrentTech = tech;
 }
 
