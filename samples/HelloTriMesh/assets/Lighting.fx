@@ -25,6 +25,7 @@ SamplerState samLinear
 
 RasterizerState CullBack
 {
+//	FILLMODE = WIREFRAME;
 	CullMode = FRONT;
 };
 
@@ -83,26 +84,28 @@ float4 PS(VertexOut pin) : SV_Target
 
 	// Sum the light contribution from each light source.
 	float4 A, D, S;
-
+#if 1
 	ComputeDirectionalLight(gMaterial, gDirLight, pin.NormalW, toEyeW, A, D, S);
 	ambient += A;  
 	diffuse += D;
 	spec    += S;
-
+#endif
+#if 1
 	ComputePointLight(gMaterial, gPointLight, pin.PosW, pin.NormalW, toEyeW, A, D, S);
 	ambient += A;
 	diffuse += D;
 	spec    += S;
-
+#endif
+#if 1
 	ComputeSpotLight(gMaterial, gSpotLight, pin.PosW, pin.NormalW, toEyeW, A, D, S);
 	ambient += A;
 	diffuse += D;
 	spec    += S;
-	   
-	float4 litColor = ambient + diffuse + spec+texColor;
+#endif   
+	float4 litColor = texColor*(ambient + diffuse) + spec;
 
 	// Common to take alpha from diffuse material.
-	litColor.a = gMaterial.Diffuse.a;
+	litColor.a = gMaterial.Diffuse.a * texColor.a;
 
     return litColor;
 }

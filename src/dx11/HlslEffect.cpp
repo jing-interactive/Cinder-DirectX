@@ -86,7 +86,10 @@ HlslEffect::Obj::~Obj()
 void HlslEffect::uniform( const std::string &name, int data )
 {
 	ID3DX11EffectVariable* var = getVariable( name );
-	var->AsScalar()->SetInt(data);
+	if (var)
+	{
+		var->AsScalar()->SetInt(data);
+	}
 	//glUniform1i( loc, data );
 }
 
@@ -111,25 +114,37 @@ void HlslEffect::uniform( const std::string &name, const Vec2i *data, int count 
 void HlslEffect::uniform( const std::string &name, float data )
 {
 	ID3DX11EffectVariable* var = getVariable( name );
-	//glUniform1f( loc, data );
+	if (var)
+	{
+		var->AsScalar()->SetFloat(data);
+	}
 }
 
 void HlslEffect::uniform( const std::string &name, const Vec2f &data )
 {
 	ID3DX11EffectVariable* var = getVariable( name );
-	//glUniform2f( loc, data.x, data.y );
+	if (var)
+	{
+		var->AsVector()->SetRawValue(&data, 0, sizeof(Vec2f));
+	}
 }
 
 void HlslEffect::uniform( const std::string &name, const Vec3f &data )
 {
 	ID3DX11EffectVariable* var = getVariable( name );
-	//glUniform3f( loc, data.x, data.y, data.z );
+	if (var)
+	{
+		var->AsVector()->SetRawValue(&data, 0, sizeof(Vec3f));
+	}
 }
 
 void HlslEffect::uniform( const std::string &name, const Vec4f &data )
 {
 	ID3DX11EffectVariable* var = getVariable( name );
-	//glUniform4f( loc, data.x, data.y, data.z, data.w );
+	if (var)
+	{
+		var->AsVector()->SetRawValue(&data, 0, sizeof(Vec4f));
+	}
 }
 
 void HlslEffect::uniform( const std::string &name, const Color &data )
