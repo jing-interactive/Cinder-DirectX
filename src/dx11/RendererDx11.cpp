@@ -203,7 +203,10 @@ void RendererDX11::kill()
 
     // Restore all default settings.
 	if( md3dImmediateContext )
+	{
 		md3dImmediateContext->ClearState();
+		md3dImmediateContext->Flush();
+	}
 
 	SAFE_RELEASE(md3dImmediateContext);
     SAFE_RELEASE(md3dDevice);
@@ -265,6 +268,9 @@ void RendererDX11::finishDraw()
 
 void RendererDX11::defaultResize()
 {
+	if (mApp->getWindowWidth() <= 0)
+		return;
+
 	assert(md3dImmediateContext);
 	assert(md3dDevice);
 	assert(mSwapChain);

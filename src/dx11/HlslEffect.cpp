@@ -147,7 +147,10 @@ void HlslEffect::uniform( const std::string &name, const ColorA &data )
 void HlslEffect::uniform( const std::string &name, const float *data, int count )
 {
 	ID3DX11EffectVariable* var = getVariable( name );
-	//glUniform1fv( loc, count, data );
+	if (var)
+	{
+		var->SetRawValue((void*)data, 0, count);
+	}
 }
 
 void HlslEffect::uniform( const std::string &name, const Vec2f *data, int count )

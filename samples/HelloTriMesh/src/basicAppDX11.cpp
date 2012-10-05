@@ -27,6 +27,10 @@ public:
 
 		texDuck = dx11::Texture(loadImage(loadAsset("ducky.png")));
 
+		mtrlDuck.Diffuse = Vec4f(1,0,0,0);
+		mtrlDuck.Ambient = Vec4f(0.2f,0.2f,0.2f,0);
+		mtrlDuck.Specular = Vec4f(0.2f,0.2f,0.2f,0);
+
 		mTransform.setToIdentity();
     }
 
@@ -64,6 +68,7 @@ public:
 		effect.uniform("gWorld", W);
 		effect.uniform("gWorldViewProj", WVP);
 		effect.uniform("gDiffuseMap", texDuck);
+		effect.uniform("gMaterial", &mtrlDuck);
 
 		effect.drawIndexed(duck.getNumIndices(), 0);
     }
@@ -78,6 +83,7 @@ private:
 	dx11::CameraPerspDX	mCam;
 
 	Matrix44f mTransform;
+	dx11::Material mtrlDuck;
 	TriMesh	duck;
 	dx11::VboMesh	vboDuck;
 	dx11::Texture	texDuck;
