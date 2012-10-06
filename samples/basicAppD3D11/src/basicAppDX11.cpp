@@ -10,8 +10,6 @@ using namespace ci;
 using namespace ci::app; 
 using namespace std;
 
-HRESULT hr = S_OK;
-
 class BasicApp : public AppBasic {
 private:
 
@@ -32,16 +30,10 @@ public:
         }
     }
 
-    void destroy()
-    {
-
-    }
-
     void keyDown( KeyEvent event )
     {
         if( event.getChar() == 'f' )
         {
-            destroy();
             setFullScreen( ! isFullScreen() );
             setup();
         }

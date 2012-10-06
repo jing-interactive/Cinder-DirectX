@@ -210,6 +210,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\src\dx11\Vbo.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\include\dx11\Vbo.h"
 				>
 			</File>

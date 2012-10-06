@@ -33,6 +33,8 @@ public:
 	template <typename VertexType>
 	HRESULT createBuffer(const VertexType* pVertices, UINT nVertices)
 	{
+		mObj = std::shared_ptr<Obj>( new Obj );
+
 		mObj->pInputElementDescs = (D3D11_INPUT_ELEMENT_DESC*)VertexType::InputElements;
 		mObj->NumInputElements = VertexType::InputElementCount;
 

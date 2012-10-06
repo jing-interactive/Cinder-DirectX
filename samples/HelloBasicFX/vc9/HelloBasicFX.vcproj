@@ -180,10 +180,26 @@
 			<File
 				RelativePath="..\..\..\src\dx11\DDSTextureLoader.cpp"
 				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\..\..\include\dx11\DDSTextureLoader.h"
 				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\..\..\src\dx11\dx11.cpp"
@@ -192,6 +208,26 @@
 			<File
 				RelativePath="..\..\..\include\dx11\dx11.h"
 				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\dx11\Effects.cpp"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\..\..\src\dx11\HlslEffect.cpp"
@@ -212,6 +248,26 @@
 			<File
 				RelativePath="..\..\..\include\dx11\RendererDx11.h"
 				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\dx11\RenderStates.cpp"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\..\..\src\dx11\Texture.cpp"
@@ -242,11 +298,11 @@
 			Name="shader"
 			>
 			<File
-				RelativePath="..\assets\LightHelper.fx"
+				RelativePath="..\assets\Basic.fx"
 				>
 			</File>
 			<File
-				RelativePath="..\assets\Lighting.fx"
+				RelativePath="..\assets\LightHelper.fx"
 				>
 			</File>
 		</Filter>

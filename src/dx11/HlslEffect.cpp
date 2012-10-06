@@ -79,8 +79,7 @@ HlslEffect::Obj::~Obj()
 	HRESULT hr = S_OK;
 	V(dx11::createEffect(effect, &mObj->mHandle));
 	mObj->mCurrentTech = mObj->mHandle->GetTechniqueByIndex(0);
-	if (!mObj->mCurrentTech->IsValid())
-		app::console()<<"There is no valid technique inside"<<endl;
+	assert (mObj->mCurrentTech->IsValid() && "There is no valid technique inside"); 
 }
  
 void HlslEffect::uniform( const std::string &name, int data )
