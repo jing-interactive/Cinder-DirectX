@@ -78,7 +78,7 @@ float4 PS(VertexOut pin) : SV_Target
 	float3 toEyeW = normalize(gEyePosW - pin.PosW);
 
 	// Start with a sum of zero. 
-	float4 ambient = float4(0.0f, 0.0f, 0.0f, 0.0f);
+	float4 ambient = float4(0.2f, 0.2f, 0.2f, 0.0f);
 	float4 diffuse = float4(0.0f, 0.0f, 0.0f, 0.0f);
 	float4 spec    = float4(0.0f, 0.0f, 0.0f, 0.0f);
 
@@ -90,19 +90,19 @@ float4 PS(VertexOut pin) : SV_Target
 	diffuse += D;
 	spec    += S;
 #endif
-#if 1
+#if 0
 	ComputePointLight(gMaterial, gPointLight, pin.PosW, pin.NormalW, toEyeW, A, D, S);
 	ambient += A;
 	diffuse += D;
 	spec    += S;
 #endif
-#if 1
+#if 0
 	ComputeSpotLight(gMaterial, gSpotLight, pin.PosW, pin.NormalW, toEyeW, A, D, S);
 	ambient += A;
 	diffuse += D;
 	spec    += S;
 #endif   
-	float4 litColor = texColor*(ambient + diffuse) + spec;
+	float4 litColor = texColor*(ambient + diffuse)/* + spec*/;
 
 	// Common to take alpha from diffuse material.
 	litColor.a = gMaterial.Diffuse.a * texColor.a;
