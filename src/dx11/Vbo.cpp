@@ -11,11 +11,11 @@ mObj( std::shared_ptr<Obj>( new Obj ) )
 	bool Ca = triMesh.hasColorsRGBA();
 	bool T = triMesh.hasTexCoords();
 
+	mObj->mNumVertices = triMesh.getNumVertices();
 	if (!N && (C || Ca) && !T)
 	{//PC
-		size_t nVertices = triMesh.getNumVertices();
-		std::vector<VertexPC> vertices(nVertices);
-		for (size_t i=0;i<nVertices;i++)
+		std::vector<VertexPC> vertices(mObj->mNumVertices);
+		for (size_t i=0;i<mObj->mNumVertices;i++)
 		{
 			vertices[i].position = triMesh.getVertices()[i];
 			if (C)
@@ -23,14 +23,13 @@ mObj( std::shared_ptr<Obj>( new Obj ) )
 			else
 				vertices[i].color = triMesh.getColorsRGBA()[i];
 		}
-		createBuffer<VertexPC>(&vertices[0], nVertices);
+		createBuffer<VertexPC>(&vertices[0], mObj->mNumVertices);
 	}
 
 	if (N && (C || Ca) && !T)
 	{//PNC
-		size_t nVertices = triMesh.getNumVertices();
-		std::vector<VertexPNC> vertices(nVertices);
-		for (size_t i=0;i<nVertices;i++)
+		std::vector<VertexPNC> vertices(mObj->mNumVertices);
+		for (size_t i=0;i<mObj->mNumVertices;i++)
 		{
 			vertices[i].position = triMesh.getVertices()[i];
 			vertices[i].normal = triMesh.getNormals()[i];
@@ -39,43 +38,43 @@ mObj( std::shared_ptr<Obj>( new Obj ) )
 			else
 				vertices[i].color = triMesh.getColorsRGBA()[i];
 		}
-		createBuffer<VertexPNC>(&vertices[0], nVertices);
+		createBuffer<VertexPNC>(&vertices[0], mObj->mNumVertices);
 	}
 
 	if (N && !(C || Ca) && T)
 	{//PNT
-		size_t nVertices = triMesh.getNumVertices();
-		std::vector<VertexPNT> vertices(nVertices);
-		for (size_t i=0;i<nVertices;i++)
+		std::vector<VertexPNT> vertices(mObj->mNumVertices);
+		for (size_t i=0;i<mObj->mNumVertices;i++)
 		{
 			vertices[i].position = triMesh.getVertices()[i];
 			vertices[i].normal = triMesh.getNormals()[i];
 			vertices[i].texCoord = triMesh.getTexCoords()[i];
 		}
-		createBuffer<VertexPNT>(&vertices[0], nVertices);
+		createBuffer<VertexPNT>(&vertices[0], mObj->mNumVertices);
 	}
 
 	if (N && T)
 	{//PNT
-		size_t nVertices = triMesh.getNumVertices();
-		std::vector<VertexPNT> vertices(nVertices);
-		for (size_t i=0;i<nVertices;i++)
+		mObj->mNumVertices = triMesh.getNumVertices();
+		std::vector<VertexPNT> vertices(mObj->mNumVertices);
+		for (size_t i=0;i<mObj->mNumVertices;i++)
 		{
 			vertices[i].position = triMesh.getVertices()[i];
 			vertices[i].normal = triMesh.getNormals()[i];
 			vertices[i].texCoord = triMesh.getTexCoords()[i];
 		}
-		createBuffer<VertexPNT>(&vertices[0], nVertices);
+		createBuffer<VertexPNT>(&vertices[0], mObj->mNumVertices);
 	}
 
 	//index buffer
-	if (triMesh.getNumIndices() > 0)
+	mObj->mNumIndices = triMesh.getNumIndices();
+	if (mObj->mNumIndices > 0)
 	{
-		createBuffer(&triMesh.getIndices()[0], triMesh.getNumIndices());
+		createBuffer(&triMesh.getIndices()[0], mObj->mNumIndices);
 	}
 }
 
-void VboMesh::bind( D3D_PRIMITIVE_TOPOLOGY Topology /*= D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST*/ )
+void VboMesh::bind( D3D_PRIMITIVE_TOPOLOGY Topology /*= D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST*/ ) const
 {
 	dx11::getImmediateContext()->IASetInputLayout(mObj->pInputLayout);
 	dx11::getImmediateContext()->IASetPrimitiveTopology( Topology );

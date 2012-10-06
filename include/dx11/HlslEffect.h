@@ -38,17 +38,14 @@
 
 namespace cinder { namespace dx11 {
 
-HRESULT createEffect(DataSourceRef datasrc, ID3DX11Effect** pEffect);
-
-void drawWithTechnique(ID3DX11EffectTechnique* tech, UINT VertexCount, UINT StartVertexLocation);
-
-void drawIndexedWithTechnique(ID3DX11EffectTechnique* tech, UINT IndexCount, UINT StartVertexLocation, INT BaseVertexLocation);
-
 //! Represents an Hlsl Effect. \ImplShared
 class HlslEffect {
   public: 
 	HlslEffect() {}
 	HlslEffect( DataSourceRef effect);
+
+	void	bind();
+	void	unbind();
 
 	void	useTechnique(const std::string &name);
 

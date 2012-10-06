@@ -16,6 +16,8 @@
 #include "cinder/Triangulate.h"
 #include "cinder/app/App.h"
 
+#include "dx11/Vbo.h"
+
 namespace{
 HRESULT hr = S_OK;
 }
@@ -26,6 +28,7 @@ ID3D11Device* g_device = NULL;
 ID3D11DeviceContext* g_immediateContex = NULL;
 ID3D11RenderTargetView* g_RenderTargetView = NULL;
 ID3D11DepthStencilView* g_DepthStencilView = NULL;
+HlslEffect*	g_currentEffect = NULL;
 
 ID3D11Device* getDevice()
 {
@@ -400,6 +403,18 @@ void CameraPerspDX::calcProjection()
 	m[ 7] =  0.0f;
 	m[11] = -1.0f;
 	m[15] =  0.0f;	 
+}
+
+void draw( const VboMesh &vbo )
+{
+	vbo.bind();
+	if (g_currentEffect != NULL)
+	{
+		if (vbo.getNumIndices() > 0)
+			g_currentEffect->drawIndexed(vbo.getNumIndices());
+		else
+			g_currentEffect->draw(vbo.getNumVertices());
+	}
 }
 
 } } // namespace cinder::dx11

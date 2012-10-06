@@ -28,7 +28,7 @@ using namespace std;
 
 namespace cinder { namespace dx11 {
 
-HRESULT createEffect(DataSourceRef datasrc, ID3DX11Effect** pEffect)
+static HRESULT createEffect(DataSourceRef datasrc, ID3DX11Effect** pEffect)
 {
 	HRESULT hr = E_FAIL;
 	if (datasrc->getBuffer().getDataSize() > 0){
@@ -42,7 +42,7 @@ HRESULT createEffect(DataSourceRef datasrc, ID3DX11Effect** pEffect)
 	return hr;
 }
 
-void drawWithTechnique(ID3DX11EffectTechnique* tech, UINT VertexCount, UINT StartVertexLocation)
+static void drawWithTechnique(ID3DX11EffectTechnique* tech, UINT VertexCount, UINT StartVertexLocation)
 {
 	HRESULT hr = S_OK;
 	D3DX11_TECHNIQUE_DESC techDesc;
@@ -54,7 +54,7 @@ void drawWithTechnique(ID3DX11EffectTechnique* tech, UINT VertexCount, UINT Star
 	}
 }
 
-void drawIndexedWithTechnique(ID3DX11EffectTechnique* tech, UINT IndexCount, UINT StartVertexLocation, INT BaseVertexLocation)
+static void drawIndexedWithTechnique(ID3DX11EffectTechnique* tech, UINT IndexCount, UINT StartVertexLocation, INT BaseVertexLocation)
 {
 	HRESULT hr = S_OK;
 	D3DX11_TECHNIQUE_DESC techDesc;
@@ -275,7 +275,21 @@ void HlslEffect::useTechnique( const std::string &name )
 		mObj->mCurrentTech = tech;
 }
 
+extern HlslEffect*	g_currentEffect;
 
+static void setCurrentEffect( HlslEffect* effect )
+{
+	g_currentEffect = effect;
+}
 
+void HlslEffect::bind()
+{
+	dx11::setCurrentEffect(this);
+}
+
+void HlslEffect::unbind()
+{
+	dx11::setCurrentEffect(NULL);
+}
 
 } } // namespace cinder::dx11

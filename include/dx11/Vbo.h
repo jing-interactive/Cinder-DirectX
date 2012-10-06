@@ -10,13 +10,15 @@ class VboMesh
 {
 private:
 	struct Obj {
-		Obj() : pInputLayout(NULL),pVertexBuffer(NULL),pIndexBuffer(NULL),vertexSize(0),pInputElementDescs(NULL),NumInputElements(0) {}
+		Obj():pInputLayout(NULL), pVertexBuffer(NULL), pIndexBuffer(NULL), vertexSize(0), mNumIndices(0), mNumVertices(0), pInputElementDescs(NULL), NumInputElements(0){}
 		~Obj();
 
 		ID3D11InputLayout*	pInputLayout;
 		ID3D11Buffer*		pVertexBuffer;
 		ID3D11Buffer*		pIndexBuffer;
 		UINT			vertexSize;
+		size_t			mNumIndices;
+		size_t			mNumVertices;
 		D3D11_INPUT_ELEMENT_DESC *pInputElementDescs; 
 		UINT			NumInputElements;
 	};
@@ -29,6 +31,9 @@ public:
 	VboMesh( const TriMesh &triMesh);
 
 	HRESULT createInputLayout(dx11::HlslEffect& effect, int pass = 0);
+
+	size_t	getNumIndices() const { return mObj->mNumIndices; }
+	size_t	getNumVertices() const { return mObj->mNumVertices; }
 
 	template <typename VertexType>
 	HRESULT createBuffer(const VertexType* pVertices, UINT nVertices)
@@ -48,7 +53,7 @@ public:
 
 	HRESULT createBuffer(const UINT* pIndices, UINT nIndices);
 
-	void bind(D3D_PRIMITIVE_TOPOLOGY Topology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	void bind(D3D_PRIMITIVE_TOPOLOGY Topology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST) const;
 
 public:
 	//@{

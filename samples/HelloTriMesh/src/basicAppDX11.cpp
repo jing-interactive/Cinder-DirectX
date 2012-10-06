@@ -15,8 +15,8 @@ using namespace std;
 class BasicApp : public AppBasic {
 
 public:
-    void setup()
-    {
+	void setup()
+	{
 		effect = dx11::HlslEffect(loadAsset(L"Lighting.fx"));
 
 		duck.read(loadAsset("ducky.msh"));
@@ -36,7 +36,7 @@ public:
 		mtrlDuck.Specular = Vec4f(0.1f, 0.1f, 0.1f, 4.0f);
 
 		mTransform.setToIdentity();
-    }
+	}
 
 	void keyDown( KeyEvent event )
 	{
@@ -69,33 +69,33 @@ public:
 		effect.uniform("gEyePosW", mCam.getEyePoint());
 	}
 
-    void draw()
-    {
-        dx11::clear(ColorA(0.5f, 0.5f, 0.5f));
+	void draw()
+	{
+		dx11::clear(ColorA(0.5f, 0.5f, 0.5f));
 
-		vboDuck.bind();
+		effect.bind();
 
 		Matrix44f W = mTransform;
-        Matrix44f V = mCam.getModelViewMatrix();
-        Matrix44f P = mCam.getProjectionMatrix();
-        Matrix44f WVP = P*V*W;
+		Matrix44f V = mCam.getModelViewMatrix();
+		Matrix44f P = mCam.getProjectionMatrix();
+		Matrix44f WVP = P*V*W;
 		effect.uniform("gWorld", W);
 		effect.uniform("gWorldViewProj", WVP);
 		effect.uniform("gDiffuseMap", texDuck);
 		effect.uniform("gMaterial", &mtrlDuck);
 
-		effect.drawIndexed(duck.getNumIndices(), 0);
-    }
+		dx11::draw(vboDuck);
+	}
 
-    void resize( ResizeEvent event )
-    {
+	void resize( ResizeEvent event )
+	{
 		mCam.lookAt( Vec3f( 0.0f, 0.0f, 10.0f ), Vec3f::zero());
-        mCam.setPerspective( 90, event.getAspectRatio(), 0.01f, 1000 );
+		mCam.setPerspective( 90, event.getAspectRatio(), 0.01f, 1000 );
 
 		mArcball.setWindowSize( getWindowSize() );
 		mArcball.setCenter( Vec2f( getWindowWidth() / 2.0f, getWindowHeight() / 2.0f ) );
 		mArcball.setRadius( 150 );
-    }
+	}
 
 private: 
 	Arcball	mArcball;
