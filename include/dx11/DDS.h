@@ -12,8 +12,9 @@
 #ifndef _DDS_H_
 #define _DDS_H_
 
-#include <dxgiformat.h>
+#include <d3d9.h>
 #include <d3d11.h>
+#include <dxgiformat.h>
 
 #pragma pack(push,1)
 
@@ -94,7 +95,7 @@ const DDS_PIXELFORMAT DDSPF_DX10 =
 
 #define DDS_FLAGS_VOLUME 0x00200000 // DDSCAPS2_VOLUME
 
-typedef struct
+struct DDS_HEADER
 {
     DWORD dwSize;
     DWORD dwHeaderFlags;
@@ -108,17 +109,24 @@ typedef struct
     DWORD dwSurfaceFlags;
     DWORD dwCubemapFlags;
     DWORD dwReserved2[3];
-} DDS_HEADER;
+};
 
-typedef struct
+struct DDS_HEADER_DXT10
 {
     DXGI_FORMAT dxgiFormat;
     D3D11_RESOURCE_DIMENSION resourceDimension;
     UINT miscFlag;
     UINT arraySize;
     UINT reserved;
-} DDS_HEADER_DXT10;
+};
 
 #pragma pack(pop)
+
+UINT BitsPerPixel( D3DFORMAT fmt );
+UINT BitsPerPixel( DXGI_FORMAT fmt );
+void GetSurfaceInfo( UINT width, UINT height, D3DFORMAT fmt, UINT* pNumBytes, UINT* pRowBytes, UINT* pNumRows );
+void GetSurfaceInfo( UINT width, UINT height, DXGI_FORMAT fmt, UINT* pNumBytes, UINT* pRowBytes, UINT* pNumRows );
+D3DFORMAT GetD3D9Format( const DDS_PIXELFORMAT& ddpf );
+DXGI_FORMAT GetDXGIFormat( const DDS_PIXELFORMAT& ddpf );
 
 #endif // _DDS_H

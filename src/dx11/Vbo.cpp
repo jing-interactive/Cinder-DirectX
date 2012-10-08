@@ -53,17 +53,16 @@ mObj( std::shared_ptr<Obj>( new Obj ) )
 		createBuffer<VertexPNT>(&vertices[0], mObj->mNumVertices);
 	}
 
-	if (N && T)
+	if (!N && !(C || Ca) && T)
 	{//PNT
 		mObj->mNumVertices = triMesh.getNumVertices();
-		std::vector<VertexPNT> vertices(mObj->mNumVertices);
+		std::vector<VertexPT> vertices(mObj->mNumVertices);
 		for (size_t i=0;i<mObj->mNumVertices;i++)
 		{
 			vertices[i].position = triMesh.getVertices()[i];
-			vertices[i].normal = triMesh.getNormals()[i];
 			vertices[i].texCoord = triMesh.getTexCoords()[i];
 		}
-		createBuffer<VertexPNT>(&vertices[0], mObj->mNumVertices);
+		createBuffer<VertexPT>(&vertices[0], mObj->mNumVertices);
 	}
 
 	//index buffer
