@@ -14,52 +14,35 @@
 #pragma once
 
 #include <d3d11.h>
-#include <memory>
 
-
-namespace DirectX
+namespace cinder { namespace dx11 
 {
-    class CommonStates
-    {
-    public:
-        explicit CommonStates(_In_ ID3D11Device* device);
-        CommonStates(CommonStates&& moveFrom);
-        CommonStates& operator= (CommonStates&& moveFrom);
-        virtual ~CommonStates();
+	class CommonStates
+	{
+	public:
+		// Blend states.
+		static ID3D11BlendState* Opaque();
+		static ID3D11BlendState* AlphaBlend();
+		static ID3D11BlendState* Additive();
+		static ID3D11BlendState* NonPremultiplied();
 
-        // Blend states.
-        ID3D11BlendState* Opaque() const;
-        ID3D11BlendState* AlphaBlend() const;
-        ID3D11BlendState* Additive() const;
-        ID3D11BlendState* NonPremultiplied() const;
+		// Depth stencil states.
+		static ID3D11DepthStencilState* DepthNone();
+		static ID3D11DepthStencilState* DepthDefault();
+		static ID3D11DepthStencilState* DepthRead();
 
-        // Depth stencil states.
-        ID3D11DepthStencilState* DepthNone() const;
-        ID3D11DepthStencilState* DepthDefault() const;
-        ID3D11DepthStencilState* DepthRead() const;
+		// Rasterizer states.
+		static ID3D11RasterizerState* CullNone();
+		static ID3D11RasterizerState* CullClockwise();
+		static ID3D11RasterizerState* CullCounterClockwise();
+		static ID3D11RasterizerState* Wireframe();
 
-        // Rasterizer states.
-        ID3D11RasterizerState* CullNone() const;
-        ID3D11RasterizerState* CullClockwise() const;
-        ID3D11RasterizerState* CullCounterClockwise() const;
-        ID3D11RasterizerState* Wireframe() const;
-
-        // Sampler states.
-        ID3D11SamplerState* PointWrap() const;
-        ID3D11SamplerState* PointClamp() const;
-        ID3D11SamplerState* LinearWrap() const;
-        ID3D11SamplerState* LinearClamp() const;
-        ID3D11SamplerState* AnisotropicWrap() const;
-        ID3D11SamplerState* AnisotropicClamp() const;
-
-    private:
-        // Private implementation.
-        class Impl;
-
-        std::shared_ptr<Impl> pImpl;
-
-        // Prevent copying.
-        CommonStates(CommonStates const&);
-        CommonStates& operator= (CommonStates const&);
-    };
-}
+		// Sampler states.
+		static ID3D11SamplerState* PointWrap();
+		static ID3D11SamplerState* PointClamp();
+		static ID3D11SamplerState* LinearWrap();
+		static ID3D11SamplerState* LinearClamp();
+		static ID3D11SamplerState* AnisotropicWrap();
+		static ID3D11SamplerState* AnisotropicClamp();
+	};
+}}

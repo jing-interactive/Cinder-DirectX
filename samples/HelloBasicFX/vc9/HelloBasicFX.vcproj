@@ -178,6 +178,14 @@
 			Name="dx11"
 			>
 			<File
+				RelativePath="..\..\..\src\dx11\CommonStates.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\include\dx11\CommonStates.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\src\dx11\DDSTextureLoader.cpp"
 				>
 				<FileConfiguration
@@ -275,6 +283,10 @@
 			</File>
 			<File
 				RelativePath="..\..\..\include\dx11\Texture.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\include\dx11\V.h"
 				>
 			</File>
 			<File
