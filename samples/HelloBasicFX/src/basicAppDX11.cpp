@@ -77,7 +77,7 @@ public:
 	void draw()
 	{
 		dx11::clear(ColorA(0.5f, 0.5f, 0.5f));
-		dx11::getImmediateContext()->RSSetState(dx11::CommonStates::CullClockwise());
+		// dx11::getImmediateContext()->RSSetState(dx11::CommonStates::CullClockwise());
 
 		effect.bind();
 

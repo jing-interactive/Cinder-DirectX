@@ -114,7 +114,7 @@ technique11 LightTech
 {
     pass P0
     {
-		SetRasterizerState( CullBack ); 
+//		SetRasterizerState( CullBack ); 
         SetVertexShader( CompileShader( vs_4_0, VS() ) );
 		SetGeometryShader( NULL );
         SetPixelShader( CompileShader( ps_4_0, PS() ) );

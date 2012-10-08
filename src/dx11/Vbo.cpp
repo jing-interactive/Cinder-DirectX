@@ -69,7 +69,14 @@ mObj( std::shared_ptr<Obj>( new Obj ) )
 	mObj->mNumIndices = triMesh.getNumIndices();
 	if (mObj->mNumIndices > 0)
 	{
-		createBuffer(&triMesh.getIndices()[0], mObj->mNumIndices);
+		std::vector<uint32_t> transformed_indices(mObj->mNumIndices);
+		for (size_t i=0;i<mObj->mNumIndices;i+=3)
+		{
+			transformed_indices[i] = triMesh.getIndices()[i];
+			transformed_indices[i+1] = triMesh.getIndices()[i+2];
+			transformed_indices[i+2] = triMesh.getIndices()[i+1];
+		}
+		createBuffer(&transformed_indices[0], mObj->mNumIndices);
 	}
 }
 

@@ -178,6 +178,10 @@
 			Name="dx11"
 			>
 			<File
+				RelativePath="..\..\..\src\dx11\DDS.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\src\dx11\DDSTextureLoader.cpp"
 				>
 				<FileConfiguration
