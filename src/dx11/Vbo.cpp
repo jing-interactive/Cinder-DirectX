@@ -3,7 +3,39 @@
 
 namespace cinder { namespace dx11 {
 
-VboMesh::VboMesh( const TriMesh &triMesh ):
+static std::vector<Vec3f> computeTangent(const TriMesh &triMesh)
+{
+	size_t NumVertices = triMesh.getNumVertices();
+	const std::vector<Vec3f>& positions = triMesh.getVertices();
+	std::vector<uint32_t> indices = triMesh.getIndices();
+	if (indices.empty())
+	{//make fake indices
+		indices.resize(NumVertices);
+		for (size_t i=0;i<NumVertices;i++)
+			indices[i] = i;
+	}
+	size_t NumTriangles = indices.size()/3;
+
+	std::vector<Vec3f> tangents(NumVertices);
+	for (size_t i=0;i<NumTriangles;i++)
+	{
+		uint32_t i0 = indices[i*3+0];
+		uint32_t i1 = indices[i*3+1];
+		uint32_t i2 = indices[i*3+2];
+
+		Vec3f diff = triMesh.getVertices()[i1] - triMesh.getVertices()[i0]; 
+		float u1 = triMesh.getTexCoords()[i1].x - triMesh.getTexCoords()[i0].x;
+		Vec3f tangent = diff/u1;
+		tangent.normalize();
+
+		tangents[i0] = tangent;
+		tangents[i1] = tangent;
+		tangents[i2] = tangent;
+	}
+	return tangents;
+}
+
+VboMesh::VboMesh( const TriMesh &triMesh, bool normalMap, bool flipOrder ):
 mObj( std::shared_ptr<Obj>( new Obj ) )
 {
 	bool N = triMesh.hasNormals();
@@ -12,71 +44,96 @@ mObj( std::shared_ptr<Obj>( new Obj ) )
 	bool T = triMesh.hasTexCoords();
 
 	mObj->mNumVertices = triMesh.getNumVertices();
-	if (!N && (C || Ca) && !T)
-	{//PC
-		std::vector<VertexPC> vertices(mObj->mNumVertices);
-		for (size_t i=0;i<mObj->mNumVertices;i++)
-		{
-			vertices[i].position = triMesh.getVertices()[i];
-			if (C)
-				vertices[i].color = triMesh.getColorsRGB()[i];
-			else
-				vertices[i].color = triMesh.getColorsRGBA()[i];
-		}
-		createBuffer<VertexPC>(&vertices[0], mObj->mNumVertices);
-	}
 
-	if (N && (C || Ca) && !T)
-	{//PNC
-		std::vector<VertexPNC> vertices(mObj->mNumVertices);
-		for (size_t i=0;i<mObj->mNumVertices;i++)
-		{
-			vertices[i].position = triMesh.getVertices()[i];
-			vertices[i].normal = triMesh.getNormals()[i];
-			if (C)
-				vertices[i].color = triMesh.getColorsRGB()[i];
-			else
-				vertices[i].color = triMesh.getColorsRGBA()[i];
-		}
-		createBuffer<VertexPNC>(&vertices[0], mObj->mNumVertices);
-	}
-
-	if (N && !(C || Ca) && T)
-	{//PNT
-		std::vector<VertexPNT> vertices(mObj->mNumVertices);
+	if (normalMap)
+	{//
+		assert (N && T);
+		std::vector<Vec3f> tangents = computeTangent(triMesh);
+		std::vector<VertexNMap> vertices(mObj->mNumVertices);
 		for (size_t i=0;i<mObj->mNumVertices;i++)
 		{
 			vertices[i].position = triMesh.getVertices()[i];
 			vertices[i].normal = triMesh.getNormals()[i];
 			vertices[i].texCoord = triMesh.getTexCoords()[i];
+			vertices[i].tangent = tangents[i];
 		}
-		createBuffer<VertexPNT>(&vertices[0], mObj->mNumVertices);
+		createBuffer<VertexNMap>(&vertices[0], mObj->mNumVertices);
 	}
-
-	if (!N && !(C || Ca) && T)
-	{//PNT
-		mObj->mNumVertices = triMesh.getNumVertices();
-		std::vector<VertexPT> vertices(mObj->mNumVertices);
-		for (size_t i=0;i<mObj->mNumVertices;i++)
-		{
-			vertices[i].position = triMesh.getVertices()[i];
-			vertices[i].texCoord = triMesh.getTexCoords()[i];
+	else
+	{
+		if (!N && (C || Ca) && !T)
+		{//PC
+			std::vector<VertexPC> vertices(mObj->mNumVertices);
+			for (size_t i=0;i<mObj->mNumVertices;i++)
+			{
+				vertices[i].position = triMesh.getVertices()[i];
+				if (C)
+					vertices[i].color = triMesh.getColorsRGB()[i];
+				else
+					vertices[i].color = triMesh.getColorsRGBA()[i];
+			}
+			createBuffer<VertexPC>(&vertices[0], mObj->mNumVertices);
 		}
-		createBuffer<VertexPT>(&vertices[0], mObj->mNumVertices);
+
+		if (N && (C || Ca) && !T)
+		{//PNC
+			std::vector<VertexPNC> vertices(mObj->mNumVertices);
+			for (size_t i=0;i<mObj->mNumVertices;i++)
+			{
+				vertices[i].position = triMesh.getVertices()[i];
+				vertices[i].normal = triMesh.getNormals()[i];
+				if (C)
+					vertices[i].color = triMesh.getColorsRGB()[i];
+				else
+					vertices[i].color = triMesh.getColorsRGBA()[i];
+			}
+			createBuffer<VertexPNC>(&vertices[0], mObj->mNumVertices);
+		}
+
+		if (N && !(C || Ca) && T)
+		{//PNT
+			std::vector<VertexPNT> vertices(mObj->mNumVertices);
+			for (size_t i=0;i<mObj->mNumVertices;i++)
+			{
+				vertices[i].position = triMesh.getVertices()[i];
+				vertices[i].normal = triMesh.getNormals()[i];
+				vertices[i].texCoord = triMesh.getTexCoords()[i];
+			}
+			createBuffer<VertexPNT>(&vertices[0], mObj->mNumVertices);
+		}
+
+		if (!N && !(C || Ca) && T)
+		{//PNT
+			mObj->mNumVertices = triMesh.getNumVertices();
+			std::vector<VertexPT> vertices(mObj->mNumVertices);
+			for (size_t i=0;i<mObj->mNumVertices;i++)
+			{
+				vertices[i].position = triMesh.getVertices()[i];
+				vertices[i].texCoord = triMesh.getTexCoords()[i];
+			}
+			createBuffer<VertexPT>(&vertices[0], mObj->mNumVertices);
+		}
 	}
 
 	//index buffer
 	mObj->mNumIndices = triMesh.getNumIndices();
 	if (mObj->mNumIndices > 0)
 	{
-		std::vector<uint32_t> transformed_indices(mObj->mNumIndices);
-		for (size_t i=0;i<mObj->mNumIndices;i+=3)
+		if (flipOrder)
 		{
-			transformed_indices[i] = triMesh.getIndices()[i];
-			transformed_indices[i+1] = triMesh.getIndices()[i+2];
-			transformed_indices[i+2] = triMesh.getIndices()[i+1];
+			std::vector<uint32_t> transformed_indices(mObj->mNumIndices);
+			for (size_t i=0;i<mObj->mNumIndices;i+=3)
+			{
+				transformed_indices[i] = triMesh.getIndices()[i];
+				transformed_indices[i+1] = triMesh.getIndices()[i+2];
+				transformed_indices[i+2] = triMesh.getIndices()[i+1];				
+			}
+			createBuffer(&transformed_indices[0], mObj->mNumIndices);
 		}
-		createBuffer(&transformed_indices[0], mObj->mNumIndices);
+		else
+		{
+			createBuffer(&triMesh.getIndices()[0], mObj->mNumIndices);
+		}		
 	}
 }
 

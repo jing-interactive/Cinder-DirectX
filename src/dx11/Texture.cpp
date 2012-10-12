@@ -83,17 +83,17 @@ void Texture::init( ImageSourceRef imageSource )
 
 	//read...
 	if( imageSource->getDataType() == ImageIo::UINT8 ) {
-		shared_ptr<ImageTargetDXTexture<uint8_t> > target = ImageTargetDXTexture<uint8_t>::createRef( this, channelOrder, isGray, imageSource->hasAlpha() );
+		shared_ptr<ImageTargetDXTexture<uint8_t> > target = ImageTargetDXTexture<uint8_t>::createRef( this, channelOrder, isGray, true );
 		imageSource->load( target );
 		init(target->getData());
 	}
 	else if( imageSource->getDataType() == ImageIo::UINT16 ) {
-		shared_ptr<ImageTargetDXTexture<uint16_t> > target = ImageTargetDXTexture<uint16_t>::createRef( this, channelOrder, isGray, imageSource->hasAlpha() );
+		shared_ptr<ImageTargetDXTexture<uint16_t> > target = ImageTargetDXTexture<uint16_t>::createRef( this, channelOrder, isGray, true );
 		imageSource->load( target );
 		init(target->getData());
 	}
 	else {
-		shared_ptr<ImageTargetDXTexture<float> > target = ImageTargetDXTexture<float>::createRef( this, channelOrder, isGray, imageSource->hasAlpha() );
+		shared_ptr<ImageTargetDXTexture<float> > target = ImageTargetDXTexture<float>::createRef( this, channelOrder, isGray, true );
 		imageSource->load( target );
 		init(target->getData());
 	}

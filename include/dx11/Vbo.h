@@ -28,7 +28,7 @@ private:
 public:
 	VboMesh(){}
 
-	VboMesh( const TriMesh &triMesh);
+	VboMesh( const TriMesh &triMesh, bool normalMap = false, bool flipOrder = true );
 
 	HRESULT createInputLayout(dx11::HlslEffect& effect, int pass = 0);
 

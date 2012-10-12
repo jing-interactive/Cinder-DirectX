@@ -160,4 +160,25 @@ struct VertexPNCT
     static const D3D11_INPUT_ELEMENT_DESC InputElements[InputElementCount];
 };
 
+// for Normal Map
+struct VertexNMap
+{
+	VertexNMap()
+	{ }
+
+	VertexNMap(const Vec3f& position, const Vec3f& normal, const Vec2f& texCoord, const Vec3f& tangent)
+		: position(position),
+		normal(normal),
+		texCoord(texCoord),
+		tangent(tangent)
+	{ } 
+
+	Vec3f position;
+	Vec3f normal;
+	Vec2f texCoord;
+	Vec3f tangent; 
+
+	static const int InputElementCount = 4;
+	static const D3D11_INPUT_ELEMENT_DESC InputElements[InputElementCount];
+};
 } } // namespace cinder::dx11
