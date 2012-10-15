@@ -27,13 +27,13 @@ public:
 
 		// Directional light.
 		mDirLight.Ambient  = Vec4f(0.1f, 0.1f, 0.1f, 1.0f);
-		mDirLight.Diffuse  = Vec4f(0.2f, 0.2f, 0.2f, 1.0f);
+		mDirLight.Diffuse  = Vec4f(0.4f, 0.4f, 0.4f, 1.0f);
 		mDirLight.Specular = Vec4f(0.2f, 0.2f, 0.2f, 1.0f);
 		mDirLight.Direction = Vec3f(0.57735f, -0.57735f, 0.57735f);
 
 		mtrlDuck.Diffuse = Vec4f(0.48f, 0.77f, 0.46f, 1.0f);
 		mtrlDuck.Ambient = Vec4f(0.48f, 0.77f, 0.46f, 1.0f);
-		mtrlDuck.Specular = Vec4f(0.1f, 0.1f, 0.1f, 4.0f);
+		mtrlDuck.Specular = Vec4f(0.2f, 0.2f, 0.2f, 8.0f);
 
 		mTransform.setToIdentity();
 	}
@@ -62,8 +62,9 @@ public:
 		Matrix44f rot = mArcball.getQuat().toMatrix44();
 		mTransform *= rot;
 
-		mDirLight.Direction.x = 200.0f*cosf( 0.2f*getElapsedSeconds() );
-		mDirLight.Direction.z = 200.0f*sinf( 0.2f*getElapsedSeconds() );
+		mDirLight.Direction.x = cosf( getElapsedSeconds() );
+		mDirLight.Direction.z = sinf( getElapsedSeconds() );
+		mDirLight.Direction.normalize();
 
 		effect.uniform("gDirLight", &mDirLight);
 		effect.uniform("gEyePosW", mCam.getEyePoint());

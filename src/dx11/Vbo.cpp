@@ -3,7 +3,7 @@
 
 namespace cinder { namespace dx11 {
 
-static std::vector<Vec3f> computeTangent(const TriMesh &triMesh)
+static std::vector<Vec4f> computeTangent(const TriMesh &triMesh)
 {
 	size_t NumVertices = triMesh.getNumVertices();
 	const std::vector<Vec3f>& positions = triMesh.getVertices();
@@ -15,22 +15,50 @@ static std::vector<Vec3f> computeTangent(const TriMesh &triMesh)
 			indices[i] = i;
 	}
 	size_t NumTriangles = indices.size()/3;
+	std::vector<Vec3f> TSum(NumVertices);
+	std::vector<Vec3f> BSum(NumVertices);
 
-	std::vector<Vec3f> tangents(NumVertices);
 	for (size_t i=0;i<NumTriangles;i++)
 	{
 		uint32_t i0 = indices[i*3+0];
 		uint32_t i1 = indices[i*3+1];
 		uint32_t i2 = indices[i*3+2];
 
-		Vec3f diff = triMesh.getVertices()[i1] - triMesh.getVertices()[i0]; 
-		float u1 = triMesh.getTexCoords()[i1].x - triMesh.getTexCoords()[i0].x;
-		Vec3f tangent = diff/u1;
-		tangent.normalize();
+		const Vec3f& v0 = triMesh.getVertices()[i0];
+		const Vec3f& v1 = triMesh.getVertices()[i1];
+		const Vec3f& v2 = triMesh.getVertices()[i2];
+		const Vec2f& w0 = triMesh.getTexCoords()[i0];
+		const Vec2f& w1 = triMesh.getTexCoords()[i1];
+		const Vec2f& w2 = triMesh.getTexCoords()[i2];
 
-		tangents[i0] = tangent;
-		tangents[i1] = tangent;
-		tangents[i2] = tangent;
+		Vec3f e0 = v1 - v0;
+		Vec3f e1 = v2 - v0;
+		Vec2f d0 = w1 - w0;
+		Vec2f d1 = w2 - w0;
+
+		float r = 1.0f / (d0.x * d1.y - d1.x * d0.y);
+		Vec3f TValue((d1.y * e0.x - d0.y * e1.x) * r, (d1.y * e0.y - d0.y * e1.y) * r,
+			(d1.y * e0.z - d0.y * e1.z) * r);
+		Vec3f BValue((d0.x * e1.x - d1.x * e0.x) * r, (d0.x * e1.y - d1.x * e0.y) * r,
+			(d0.x * e1.z - d1.x * e0.z) * r);
+
+		TSum[i0] += TValue;
+		TSum[i1] += TValue;
+		TSum[i2] += TValue;
+		BSum[i0] += BValue;
+		BSum[i1] += BValue;
+		BSum[i2] += BValue;
+	}
+
+	std::vector<Vec4f> tangents(NumVertices);
+	for (size_t a = 0; a < NumVertices; a++)
+	{
+		const Vec3f& n = triMesh.getNormals()[a];
+		const Vec3f& t = TSum[a];
+		// Gram-Schmidt orthogonalize.
+		tangents[a] = (t - n * n.dot(t)).normalized();
+		// Calculate handedness.
+		tangents[a].w = (n.cross(t).dot(BSum[a]) < 0.0f) ? -1.0f : 1.0f;
 	}
 	return tangents;
 }
@@ -48,14 +76,14 @@ mObj( std::shared_ptr<Obj>( new Obj ) )
 	if (normalMap)
 	{//
 		assert (N && T);
-		std::vector<Vec3f> tangents = computeTangent(triMesh);
+		std::vector<Vec4f> tangents = computeTangent(triMesh);
 		std::vector<VertexNMap> vertices(mObj->mNumVertices);
 		for (size_t i=0;i<mObj->mNumVertices;i++)
 		{
 			vertices[i].position = triMesh.getVertices()[i];
 			vertices[i].normal = triMesh.getNormals()[i];
 			vertices[i].texCoord = triMesh.getTexCoords()[i];
-			vertices[i].tangent = tangents[i];
+			vertices[i].tangent = tangents[i].xyz();
 		}
 		createBuffer<VertexNMap>(&vertices[0], mObj->mNumVertices);
 	}

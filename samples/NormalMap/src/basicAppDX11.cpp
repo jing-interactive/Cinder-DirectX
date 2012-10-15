@@ -12,6 +12,8 @@ using namespace ci;
 using namespace ci::app; 
 using namespace std;
 
+HRESULT hr = S_OK;
+
 class BasicApp : public AppBasic {
 
 public:
@@ -28,14 +30,14 @@ public:
 		texNormal = dx11::Texture(loadImage(loadAsset("wc1_normal.jpg")));
 
 		// Directional light.
-		mDirLight.Ambient  = Vec4f(0.1f, 0.1f, 0.1f, 1.0f);
-		mDirLight.Diffuse  = Vec4f(0.2f, 0.2f, 0.2f, 1.0f);
-		mDirLight.Specular = Vec4f(0.2f, 0.2f, 0.2f, 1.0f);
+		mDirLight.Ambient  = Vec4f(0.2f, 0.2f, 0.2f, 1.0f);
+		mDirLight.Diffuse  = Vec4f(0.7f, 0.7f, 0.7f, 1.0f);
+		mDirLight.Specular = Vec4f(0.7f, 0.7f, 0.7f, 1.0f);
 		mDirLight.Direction = Vec3f(0.57735f, -0.57735f, 0.57735f);
 
 		mtrlDuck.Diffuse = Vec4f(0.48f, 0.48f, 0.46f, 1.0f);
 		mtrlDuck.Ambient = Vec4f(0.48f, 0.48f, 0.46f, 1.0f);
-		mtrlDuck.Specular = Vec4f(0.1f, 0.1f, 0.1f, 4.0f);
+		mtrlDuck.Specular = Vec4f(0.3f, 0.3f, 0.3f, 4.0f);
 
 		mTransform.setToIdentity();
 	}
@@ -44,6 +46,14 @@ public:
 	{
 		if (event.getCode() == KeyEvent::KEY_ESCAPE)
 			quit();
+		if (event.getCode() == KeyEvent::KEY_1)
+		{
+			effect.useTechnique("LightTech");
+		}
+		else if (event.getCode() == KeyEvent::KEY_2)
+		{
+			effect.useTechnique("LightTechNormalMap");
+		}
 	}
 
 	void mouseDown( MouseEvent event )
@@ -64,8 +74,10 @@ public:
 		Matrix44f rot = mArcball.getQuat().toMatrix44();
 		mTransform *= rot;
 
-		mDirLight.Direction.x = 200.0f*cosf( 0.2f*getElapsedSeconds() );
-		mDirLight.Direction.z = 200.0f*sinf( 0.2f*getElapsedSeconds() );
+		mDirLight.Direction.x = cosf( getElapsedSeconds() );
+		mDirLight.Direction.y = cosf( 2*getElapsedSeconds() );
+		mDirLight.Direction.z = sinf( getElapsedSeconds() );
+		mDirLight.Direction.normalize();
 
 		effect.uniform("gDirLight", &mDirLight);
 		effect.uniform("gEyePosW", mCam.getEyePoint());
@@ -92,7 +104,7 @@ public:
 
 	void resize( ResizeEvent event )
 	{
-		mCam.lookAt( Vec3f( 0.0f, 0.0f, 200.0f ), Vec3f::zero());
+		mCam.lookAt( Vec3f( 0.0f, 0.0f, 300.0f ), Vec3f::zero());
 		mCam.setPerspective( 90, event.getAspectRatio(), 0.01f, 1000 );
 
 		mArcball.setWindowSize( getWindowSize() );

@@ -24,10 +24,10 @@ SamplerState samLinear
 	AddressV = WRAP;
 };
 
-RasterizerState CullFront
+RasterizerState rsWireframe
 {
-//	FILLMODE = WIREFRAME;
-	CullMode = FRONT;
+	FILLMODE = WIREFRAME;
+//	CullMode = FRONT;
 };
 
 cbuffer cbPerObject
@@ -73,21 +73,19 @@ VS_OUTPUT VS(VS_INPUT input)
 	return vout;
 }
   
-float4 PS(VS_OUTPUT input) : SV_Target
+float4 PS(VS_OUTPUT input, uniform bool gUseNormalMapping) : SV_Target
 {
-	// Interpolating normal can unnormalize it, so normalize it.
-	input.NormalW = normalize(input.NormalW);
-    
-	float4 texColor = gDiffuseMap.Sample( samLinear, input.Tex );
-
 	// Interpolating normal can unnormalize it, so normalize it.
     input.NormalW = normalize(input.NormalW);
     
-	//
-	// Normal mapping
-	//
-    float3 normalT = gNormalMap.Sample( samLinear, input.Tex );
-	float3 bumpedNormalW = NormalSampleToWorldSpace(normalT, input.NormalW, input.TangentW);
+	if (gUseNormalMapping)
+	{
+		//
+		// Normal mapping
+		//
+		float3 normalT = gNormalMap.Sample( samLinear, input.Tex );
+		input.NormalW = 1.5*NormalSampleToWorldSpace(normalT, input.NormalW, input.TangentW);
+	}
     
 	float3 toEyeW = normalize(gEyePosW - input.PosW);
 
@@ -98,26 +96,38 @@ float4 PS(VS_OUTPUT input) : SV_Target
 
 	// Sum the light contribution from each light source.
 	float4 A, D, S;
-	ComputeDirectionalLight(gMaterial, gDirLight, bumpedNormalW, toEyeW, A, D, S);
+	ComputeDirectionalLight(gMaterial, gDirLight, input.NormalW, toEyeW, A, D, S);
 	ambient += A;  
 	diffuse += D;
 	spec    += S;
 
-	float4 litColor = texColor*(ambient + diffuse);
+	float4 texColor = gDiffuseMap.Sample( samLinear, input.Tex );
+	float4 finalColor = texColor*(ambient + diffuse) + spec;
 
 	// Common to take alpha from diffuse material.
-	litColor.a = gMaterial.Diffuse.a * texColor.a;
+	finalColor.a = gMaterial.Diffuse.a * texColor.a;
 
-    return litColor;
+    return finalColor;
 }
 
 technique11 LightTech
 {
     pass P0
     {
-//		SetRasterizerState( CullFront ); 
+		//SetRasterizerState( rsWireframe ); 
         SetVertexShader( CompileShader( vs_4_0, VS() ) );
 		SetGeometryShader( NULL );
-        SetPixelShader( CompileShader( ps_4_0, PS() ) );
+        SetPixelShader( CompileShader( ps_4_0, PS(false) ) );
+    }
+}
+
+technique11 LightTechNormalMap
+{
+    pass P0
+    {
+		//SetRasterizerState( rsWireframe ); 
+        SetVertexShader( CompileShader( vs_4_0, VS() ) );
+		SetGeometryShader( NULL );
+        SetPixelShader( CompileShader( ps_4_0, PS(true) ) );
     }
 }
