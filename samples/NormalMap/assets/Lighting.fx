@@ -16,6 +16,7 @@ cbuffer cbPerFrame
 
 Texture2D gDiffuseMap;
 Texture2D gNormalMap;
+Texture2D gSpecularMap;
 
 SamplerState samLinear
 {
@@ -94,6 +95,8 @@ float4 PS(VS_OUTPUT input, uniform bool gUseNormalMapping) : SV_Target
 	float4 diffuse = float4(0.0f, 0.0f, 0.0f, 0.0f);
 	float4 spec    = float4(0.0f, 0.0f, 0.0f, 0.0f);
 
+	float3 specSamp = gSpecularMap.Sample( samLinear, input.Tex );
+
 	// Sum the light contribution from each light source.
 	float4 A, D, S;
 	ComputeDirectionalLight(gMaterial, gDirLight, input.NormalW, toEyeW, A, D, S);
@@ -102,7 +105,7 @@ float4 PS(VS_OUTPUT input, uniform bool gUseNormalMapping) : SV_Target
 	spec    += S;
 
 	float4 texColor = gDiffuseMap.Sample( samLinear, input.Tex );
-	float4 finalColor = texColor*(ambient + diffuse) + spec;
+	float4 finalColor = texColor*(ambient + diffuse) + spec*float4(specSamp,0);
 
 	// Common to take alpha from diffuse material.
 	finalColor.a = gMaterial.Diffuse.a * texColor.a;

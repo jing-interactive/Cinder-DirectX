@@ -22,12 +22,14 @@ public:
 		effect = dx11::HlslEffect(loadAsset(L"Lighting.fx"));
 	
 		ObjLoader loader(loadAsset("wc1.obj"));
-		loader.load(&mesh, boost::tribool::true_value);
+		//loader.load(&mesh, boost::tribool::true_value);
+		mesh.read(loadAsset("ducky.msh"));
 		vboMesh = dx11::VboMesh(mesh, true);
 		vboMesh.createInputLayout(effect);
 
-		texDiffuse = dx11::Texture(loadImage(loadAsset("wc1_diffuse.jpg")));
+		texDiffuse = dx11::Texture(loadImage(loadAsset("ducky.png")));
 		texNormal = dx11::Texture(loadImage(loadAsset("wc1_normal.jpg")));
+		texSpecular = dx11::Texture(loadImage(loadAsset("wc1_specular.jpg")));
 
 		// Directional light.
 		mDirLight.Ambient  = Vec4f(0.2f, 0.2f, 0.2f, 1.0f);
@@ -97,6 +99,7 @@ public:
 		effect.uniform("gWorldViewProj", WVP);
 		effect.uniform("gDiffuseMap", texDiffuse);
 		effect.uniform("gNormalMap", texNormal);
+		effect.uniform("gSpecularMap", texSpecular);
 		effect.uniform("gMaterial", &mtrlDuck);
 
 		dx11::draw(vboMesh);
@@ -104,7 +107,7 @@ public:
 
 	void resize( ResizeEvent event )
 	{
-		mCam.lookAt( Vec3f( 0.0f, 0.0f, 300.0f ), Vec3f::zero());
+		mCam.lookAt( Vec3f( 0.0f, 0.0f, 8.0f ), Vec3f::zero());
 		mCam.setPerspective( 90, event.getAspectRatio(), 0.01f, 1000 );
 
 		mArcball.setWindowSize( getWindowSize() );
@@ -122,8 +125,7 @@ private:
 	dx11::Material mtrlDuck;
 	TriMesh	mesh;
 	dx11::VboMesh	vboMesh;
-	dx11::Texture	texDiffuse;
-	dx11::Texture	texNormal;
+	dx11::Texture	texDiffuse, texNormal, texSpecular;
 
 	dx11::HlslEffect effect;
 };
