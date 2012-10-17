@@ -20,6 +20,7 @@ public:
 	void setup()
 	{
 		effect = dx11::HlslEffect(loadAsset(L"Lighting.fx"));
+		effect.useTechnique("LightTechNormalMap");
 	
 		ObjLoader loader(loadAsset("wc1.obj"));
 		//loader.load(&mesh, boost::tribool::true_value);

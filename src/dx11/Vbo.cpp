@@ -1,5 +1,8 @@
+#include "cinder/TriMesh.h"
+
 #include "dx11/Vbo.h"
 #include "dx11/VertexTypes.h"
+#include "dx11/SdkMesh.h"
 
 namespace cinder { namespace dx11 {
 
@@ -85,7 +88,7 @@ mObj( std::shared_ptr<Obj>( new Obj ) )
 			vertices[i].texCoord = triMesh.getTexCoords()[i];
 			vertices[i].tangent = tangents[i].xyz();
 		}
-		createBuffer<VertexNMap>(&vertices[0], mObj->mNumVertices);
+		createVertexBuffer<VertexNMap>(&vertices[0], mObj->mNumVertices);
 	}
 	else
 	{
@@ -100,7 +103,7 @@ mObj( std::shared_ptr<Obj>( new Obj ) )
 				else
 					vertices[i].color = triMesh.getColorsRGBA()[i];
 			}
-			createBuffer<VertexPC>(&vertices[0], mObj->mNumVertices);
+			createVertexBuffer<VertexPC>(&vertices[0], mObj->mNumVertices);
 		}
 
 		if (N && (C || Ca) && !T)
@@ -115,7 +118,7 @@ mObj( std::shared_ptr<Obj>( new Obj ) )
 				else
 					vertices[i].color = triMesh.getColorsRGBA()[i];
 			}
-			createBuffer<VertexPNC>(&vertices[0], mObj->mNumVertices);
+			createVertexBuffer<VertexPNC>(&vertices[0], mObj->mNumVertices);
 		}
 
 		if (N && !(C || Ca) && T)
@@ -127,7 +130,7 @@ mObj( std::shared_ptr<Obj>( new Obj ) )
 				vertices[i].normal = triMesh.getNormals()[i];
 				vertices[i].texCoord = triMesh.getTexCoords()[i];
 			}
-			createBuffer<VertexPNT>(&vertices[0], mObj->mNumVertices);
+			createVertexBuffer<VertexPNT>(&vertices[0], mObj->mNumVertices);
 		}
 
 		if (!N && !(C || Ca) && T)
@@ -139,7 +142,7 @@ mObj( std::shared_ptr<Obj>( new Obj ) )
 				vertices[i].position = triMesh.getVertices()[i];
 				vertices[i].texCoord = triMesh.getTexCoords()[i];
 			}
-			createBuffer<VertexPT>(&vertices[0], mObj->mNumVertices);
+			createVertexBuffer<VertexPT>(&vertices[0], mObj->mNumVertices);
 		}
 	}
 
@@ -156,11 +159,11 @@ mObj( std::shared_ptr<Obj>( new Obj ) )
 				transformed_indices[i+1] = triMesh.getIndices()[i+2];
 				transformed_indices[i+2] = triMesh.getIndices()[i+1];				
 			}
-			createBuffer(&transformed_indices[0], mObj->mNumIndices);
+			createIndexBuffer(&transformed_indices[0], mObj->mNumIndices);
 		}
 		else
 		{
-			createBuffer(&triMesh.getIndices()[0], mObj->mNumIndices);
+			createIndexBuffer(&triMesh.getIndices()[0], mObj->mNumIndices);
 		}		
 	}
 }
@@ -170,33 +173,47 @@ void VboMesh::bind( D3D_PRIMITIVE_TOPOLOGY Topology /*= D3D11_PRIMITIVE_TOPOLOGY
 	dx11::getImmediateContext()->IASetInputLayout(mObj->pInputLayout);
 	dx11::getImmediateContext()->IASetPrimitiveTopology( Topology );
 
-	UINT stride = mObj->vertexSize;
+	UINT stride = mObj->mVertexSize;
 	UINT offset = 0;
 	dx11::getImmediateContext()->IASetVertexBuffers( 0, 1, &mObj->pVertexBuffer, &stride, &offset );
-	dx11::getImmediateContext()->IASetIndexBuffer(mObj->pIndexBuffer, DXGI_FORMAT_R32_UINT, 0 );
+	dx11::getImmediateContext()->IASetIndexBuffer(mObj->pIndexBuffer, mObj->mIBFormat, 0 );
 }
 
-HRESULT VboMesh::createBuffer( const UINT* pIndices, UINT nIndices )
+HRESULT VboMesh::createVertexBuffer( const void* pVertices, UINT nVertices, const D3D11_INPUT_ELEMENT_DESC* pElementDescs, UINT NumInputElements, UINT VertexSize)
 {
-	CD3D11_BUFFER_DESC bd(sizeof(UINT)*nIndices, D3D11_BIND_INDEX_BUFFER);
+	mObj = std::shared_ptr<Obj>( new Obj );
+
+	mObj->mNumVertices = nVertices;
+	mObj->mNumInputElements = NumInputElements;
+	mObj->pInputElementDescs = new D3D11_INPUT_ELEMENT_DESC[NumInputElements];
+	for (size_t i=0;i<NumInputElements;i++)
+		mObj->pInputElementDescs[i] = pElementDescs[i];
+
+	mObj->mVertexSize = VertexSize;
+	CD3D11_BUFFER_DESC bd(mObj->mVertexSize*nVertices, D3D11_BIND_VERTEX_BUFFER);
 
 	D3D11_SUBRESOURCE_DATA InitData = {0};
-	InitData.pSysMem = pIndices;
-	return dx11::getDevice()->CreateBuffer( &bd, &InitData, &mObj->pIndexBuffer );
+	InitData.pSysMem = pVertices;
+	return dx11::getDevice()->CreateBuffer( &bd, &InitData, &mObj->pVertexBuffer );
 }
 
 HRESULT VboMesh::createInputLayout( dx11::HlslEffect& effect, int pass /*= 0*/ )
 {
 	assert (mObj->pInputElementDescs != NULL && "call createBuffer() first");
-	return effect.createInputLayout(mObj->pInputElementDescs, mObj->NumInputElements, &mObj->pInputLayout, pass) ;
+	return effect.createInputLayout(mObj->pInputElementDescs, mObj->mNumInputElements, &mObj->pInputLayout, pass) ;
 }
-
 
 VboMesh::Obj::~Obj()
 {
 	SAFE_RELEASE(pInputLayout);
 	SAFE_RELEASE(pVertexBuffer);
 	SAFE_RELEASE(pIndexBuffer);
+	SAFE_DELETE_ARRAY(pInputElementDescs);
+}
+
+VboMesh::VboMesh( const SdkMesh &sdkMesh, bool normalMap /*= false*/, bool flipOrder /*= true */ )
+{
+	sdkMesh.load(0, this);
 }
 
 }}

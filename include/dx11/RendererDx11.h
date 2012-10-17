@@ -22,6 +22,7 @@
 
 #pragma once
 
+#include "cinder/app/Renderer.h"
 #include "cinder/Cinder.h"
 #include "cinder/Surface.h"
 #include "cinder/Display.h"

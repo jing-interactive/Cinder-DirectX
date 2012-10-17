@@ -84,8 +84,8 @@ float4 PS(VS_OUTPUT input, uniform bool gUseNormalMapping) : SV_Target
 		//
 		// Normal mapping
 		//
-		float3 normalT = gNormalMap.Sample( samLinear, input.Tex );
-		input.NormalW = 1.5*NormalSampleToWorldSpace(normalT, input.NormalW, input.TangentW);
+		float3 normalMapSamp = gNormalMap.Sample( samLinear, input.Tex );
+		input.NormalW = 1.5*NormalSampleToWorldSpace(normalMapSamp, input.NormalW, input.TangentW);
 	}
     
 	float3 toEyeW = normalize(gEyePosW - input.PosW);
