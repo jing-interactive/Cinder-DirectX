@@ -36,7 +36,9 @@ public:
 		vboMesh = dx11::VboMesh(sdkMesh, true);
 		vboMesh.createInputLayout(effect);
 
-		texDuck = dx11::Texture(loadImage(loadAsset("MicroscopeCity\\city.dds")));
+		dx11::Texture::Format format;
+		format.enableMipmapping(true);
+		texDuck = dx11::Texture(loadImage(loadAsset("MicroscopeCity\\city.dds")), format);
 
 		// Directional light.
 		mDirLight.Ambient  = Vec4f(0.1f, 0.1f, 0.1f, 1.0f);
@@ -67,12 +69,12 @@ public:
 
 	void mouseDown( MouseEvent event )
 	{
-		mArcball.mouseDown( event.getPos() );
+		mArcball.mouseDown( Vec2i(event.getPos().x, getWindowHeight()-event.getPos().y) );
 	}
 
 	void mouseDrag( MouseEvent event )
 	{
-		mArcball.mouseDrag( event.getPos() );
+		mArcball.mouseDrag( Vec2i(event.getPos().x, getWindowHeight()-event.getPos().y) );
 	}
 
 	void update()

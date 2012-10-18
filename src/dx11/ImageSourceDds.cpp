@@ -171,7 +171,7 @@ namespace cinder {
 
 	bool ImageSourceDds::processData()
 	{
-		UINT iMipCount = 1;
+		UINT iMipCount = pHeader->dwMipMapCount;
 
 		D3D11_TEXTURE2D_DESC desc;
 		if ((  pHeader->ddspf.dwFlags & DDS_FOURCC )

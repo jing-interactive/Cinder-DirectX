@@ -21,9 +21,19 @@ private:
 	std::shared_ptr<Obj>	mObj;
 
 public:
+	struct Format
+	{
+		Format();
+		//! Enables or disables mipmapping. Default is disabled.
+		void	enableMipmapping( bool enableMipmapping = true ) { mMipmapping = enableMipmapping; }
+		//! Returns whether the texture has mipmapping enabled
+		bool	hasMipmapping() const { return mMipmapping; }
+	protected:
+		bool			mMipmapping;
+	};
 	Texture(){}
 
-	Texture( ImageSourceRef imageSource);
+	Texture( ImageSourceRef imageSource, Format format = Format());
 
 	int getWidth() const;
 	int getHeight() const;
@@ -31,9 +41,9 @@ public:
 	operator ID3D11ShaderResourceView*() const { return mObj->mSRV; }
 
 protected:
-	void	init( ImageSourceRef imageSource);	
+	void	init( ImageSourceRef imageSource, const Format &format);	
 
-	HRESULT	init(const void* pBitData);
+	HRESULT	init(const void* pBitData, const Format &format );
 
 public:
 	//@{

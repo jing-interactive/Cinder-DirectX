@@ -6,10 +6,20 @@ using namespace std;
 
 namespace cinder { namespace dx11 {
 
-Texture::Texture( ImageSourceRef imageSource ):
+Texture::Texture( ImageSourceRef imageSource, Format format/* = Format() */):
 mObj( shared_ptr<Obj>( new Obj ) )
-{
-	init(imageSource);
+{	
+	if (format.hasMipmapping())
+	{
+		UINT support = 0;
+		HRESULT hr = S_OK;
+		V(dx11::getDevice()->CheckFormatSupport(static_cast<DXGI_FORMAT>(imageSource->getChannelOrder()), &support));
+		if (!(support & D3D11_FORMAT_SUPPORT_RENDER_TARGET))
+		{
+			format.enableMipmapping(false);
+		}
+	}
+	init(imageSource, format);
 }
 
 
@@ -36,7 +46,7 @@ private:
 	int					mRowInc;
 };
 
-void Texture::init( ImageSourceRef imageSource )
+void Texture::init( ImageSourceRef imageSource, const Format &format  )
 {
 	mObj->mWidth = imageSource->getWidth();
 	mObj->mHeight = imageSource->getHeight();
@@ -88,21 +98,21 @@ void Texture::init( ImageSourceRef imageSource )
 	if( imageSource->getDataType() == ImageIo::UINT8 ) {
 		shared_ptr<ImageTargetDXTexture<uint8_t> > target = ImageTargetDXTexture<uint8_t>::createRef( this, channelOrder, isGray, true );
 		imageSource->load( target );
-		init(target->getData());
+		init(target->getData(), format);
 	}
 	else if( imageSource->getDataType() == ImageIo::UINT16 ) {
 		shared_ptr<ImageTargetDXTexture<uint16_t> > target = ImageTargetDXTexture<uint16_t>::createRef( this, channelOrder, isGray, true );
 		imageSource->load( target );
-		init(target->getData());
+		init(target->getData(), format);
 	}
 	else {
 		shared_ptr<ImageTargetDXTexture<float> > target = ImageTargetDXTexture<float>::createRef( this, channelOrder, isGray, true );
 		imageSource->load( target );
-		init(target->getData());
+		init(target->getData(), format);
 	}
 }
 
-HRESULT Texture::init(const void* pBitData)
+HRESULT Texture::init(const void* pBitData, const Format &format )
 {
 	HRESULT hr = S_OK;
 	// Create the texture 
@@ -110,6 +120,11 @@ HRESULT Texture::init(const void* pBitData)
 	//TODO: supports more fields
 	desc.MipLevels = 1;
 	desc.ArraySize = 1;
+	if (format.hasMipmapping())
+	{
+		desc.BindFlags |=  D3D11_BIND_RENDER_TARGET;
+		desc.MiscFlags = D3D11_RESOURCE_MISC_GENERATE_MIPS;
+	}
 
 	D3D11_SUBRESOURCE_DATA* pInitData = new D3D11_SUBRESOURCE_DATA[desc.MipLevels * desc.ArraySize];
 	if( !pInitData )
@@ -147,12 +162,13 @@ HRESULT Texture::init(const void* pBitData)
 #ifdef _DEBUG
 //	pTex2D->SetPrivateData( WKPDID_D3DDebugObjectName, sizeof("dx11::Texture::init")-1, "dx11::Texture::init" );
 #endif
-	D3D11_SHADER_RESOURCE_VIEW_DESC SRVDesc;
-	ZeroMemory( &SRVDesc, sizeof( SRVDesc ) );
-	SRVDesc.Format = desc.Format;
-	SRVDesc.ViewDimension = D3D_SRV_DIMENSION_TEXTURE2D;
-	SRVDesc.Texture2D.MipLevels = desc.MipLevels;
+	CD3D11_SHADER_RESOURCE_VIEW_DESC SRVDesc(D3D_SRV_DIMENSION_TEXTURE2D, desc.Format);
+	//TODO
+	//SRVDesc.Texture2D.MipLevels = desc.MipLevels;
 	V_RETURN(dx11::getDevice()->CreateShaderResourceView( pTex2D, &SRVDesc, &mObj->mSRV));
+
+	if (format.hasMipmapping())
+		dx11::getImmediateContext()->GenerateMips(mObj->mSRV);
 	SAFE_RELEASE( pTex2D );
 
 	SAFE_DELETE_ARRAY( pInitData );
@@ -211,6 +227,12 @@ template<typename T>
 ImageTargetDXTexture<T>::~ImageTargetDXTexture()
 {
 	delete [] mData;
+}
+
+
+Texture::Format::Format()
+{
+	mMipmapping = false;
 }
 
 }}
