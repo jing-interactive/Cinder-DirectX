@@ -10,6 +10,7 @@
 #include "dx11/LightHelper.h"
 #include "dx11/Texture.h"
 #include "dx11/SdkMesh.h"
+#include "dx11/ImageSourceDds.h"
 
 using namespace ci;
 using namespace ci::app; 
@@ -35,7 +36,7 @@ public:
 		vboMesh = dx11::VboMesh(sdkMesh, true);
 		vboMesh.createInputLayout(effect);
 
-		texDuck = dx11::Texture(loadImage(loadAsset("MicroscopeCity\\city.jpg")));
+		texDuck = dx11::Texture(loadImage(loadAsset("MicroscopeCity\\city.dds")));
 
 		// Directional light.
 		mDirLight.Ambient  = Vec4f(0.1f, 0.1f, 0.1f, 1.0f);

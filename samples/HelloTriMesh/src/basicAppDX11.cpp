@@ -1,12 +1,14 @@
 #include "cinder/app/AppBasic.h"
 #include "cinder/Utilities.h"
+#include "cinder/ImageIo.h"
+#include "cinder/Arcball.h"
+#include "cinder/TriMesh.h"
+
 #include "dx11/RendererDx11.h"
 #include "dx11/VertexTypes.h"
 #include "dx11/Vbo.h"
 #include "dx11/LightHelper.h"
 #include "dx11/Texture.h"
-#include "cinder/ImageIo.h"
-#include "cinder/Arcball.h"
 
 using namespace ci;
 using namespace ci::app; 
@@ -58,7 +60,7 @@ public:
 	{
 		// animate our little ducky
 		mTransform.setToIdentity();
-		mTransform.scale(3);
+		mTransform.scale(Vec3f(2,2,2));
 		Matrix44f rot = mArcball.getQuat().toMatrix44();
 		mTransform *= rot;
 
@@ -90,7 +92,7 @@ public:
 
 	void resize( ResizeEvent event )
 	{
-		mCam.lookAt( Vec3f( 0.0f, 0.0f, 10.0f ), Vec3f::zero());
+		mCam.lookAt( Vec3f( 0.0f, 0.0f, 20.0f ), Vec3f::zero());
 		mCam.setPerspective( 90, event.getAspectRatio(), 0.01f, 1000 );
 
 		mArcball.setWindowSize( getWindowSize() );

@@ -81,7 +81,10 @@ void Texture::init( ImageSourceRef imageSource )
 		//mObj->mInternalFormat = format.mInternalFormat;
 	}
 
+	if (imageSource->getChannelOrder() >= ImageIo::CUSTOM)
+		mObj->mInternalFormat = static_cast<DXGI_FORMAT>(imageSource->getChannelOrder());
 	//read...
+	//ImageTargetDXTexture works like a temp medium, only ImageTargetDXTexture::getData() is needed later
 	if( imageSource->getDataType() == ImageIo::UINT8 ) {
 		shared_ptr<ImageTargetDXTexture<uint8_t> > target = ImageTargetDXTexture<uint8_t>::createRef( this, channelOrder, isGray, true );
 		imageSource->load( target );
@@ -104,6 +107,7 @@ HRESULT Texture::init(const void* pBitData)
 	HRESULT hr = S_OK;
 	// Create the texture 
 	CD3D11_TEXTURE2D_DESC desc(mObj->mInternalFormat, mObj->mWidth, mObj->mHeight);
+	//TODO: supports more fields
 	desc.MipLevels = 1;
 	desc.ArraySize = 1;
 

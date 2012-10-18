@@ -214,6 +214,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\src\dx11\DXUT\DXUTSDKmesh.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\dx11\DXUT\DXUTSDKmesh.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\src\dx11\HlslEffect.cpp"
 				>
 			</File>
@@ -231,6 +239,10 @@
 			</File>
 			<File
 				RelativePath="..\..\..\include\dx11\RendererDx11.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\dx11\SdkMesh.cpp"
 				>
 			</File>
 			<File

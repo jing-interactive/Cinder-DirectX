@@ -157,14 +157,16 @@ namespace cinder {
 
 	void ImageSourceDds::load( ImageTargetRef target )
 	{
-		// get a pointer to the ImageSource function appropriate for handling our data configuration
-		ImageSource::RowFunc func = setupRowFunc( target );
-
-		const uint8_t *data = mData;
-		for( int32_t row = 0; row < mHeight; ++row ) {
-			((*this).*func)( target, row, data );
-			data += mRowBytes;
-		}
+// 		// get a pointer to the ImageSource function appropriate for handling our data configuration
+// 		ImageSource::RowFunc func = setupRowFunc( target );
+// 
+// 		const uint8_t *data = mData;
+// 		for( int32_t row = 0; row < mHeight; ++row ) {
+// 			((*this).*func)( target, row, data );
+// 			data += mRowBytes;
+// 		}
+		void* targetDataPtr = target->getRowPointer(0);
+		memcpy(targetDataPtr, mData, mDataSize);
 	}
 
 	bool ImageSourceDds::processData()
@@ -238,10 +240,12 @@ namespace cinder {
 
 		GetSurfaceInfo(pHeader->dwWidth, pHeader->dwHeight, mFormat, NULL, &mRowBytes, NULL);
 		setDataType(ImageIo::UINT8 );
+		//HACK: ..
+		//setDataType(static_cast<DataType>(desc.Format));
 		//setDataType( ( pHeader-> == 16 ) ? ImageIo::UINT16 : ImageIo::UINT8 );
 
 		setColorModel( ImageIo::CM_RGB );
-		setChannelOrder( ImageIo::RGBA );
+		setChannelOrder( static_cast<ChannelOrder>(desc.Format) );
 
 		// 		switch( mFormat ) {
 		// 		case DXGI_FORMAT_BC1_UNORM:

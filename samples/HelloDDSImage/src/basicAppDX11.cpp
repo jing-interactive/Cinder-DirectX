@@ -70,12 +70,13 @@ public:
 	{
 		// animate our little ducky
 		mTransform.setToIdentity();
-		mTransform.scale(3);
+		mTransform.scale(Vec3f(3,3,3));
 		Matrix44f rot = mArcball.getQuat().toMatrix44();
 		mTransform *= rot;
 
-		mDirLight.Direction.x = 200.0f*cosf( 0.2f*getElapsedSeconds() );
-		mDirLight.Direction.z = 200.0f*sinf( 0.2f*getElapsedSeconds() );
+		mDirLight.Direction.x = cosf( 0.2f*getElapsedSeconds() );
+		mDirLight.Direction.z = sinf( 0.2f*getElapsedSeconds() );
+		mDirLight.Direction.normalize();
 
 		effect.uniform("gDirLight", &mDirLight);
 		effect.uniform("gEyePosW", mCam.getEyePoint());
