@@ -40,6 +40,8 @@ class CameraPerspDX : public CameraPersp{
 	void calcProjection();
 };
 
+void setDebugObjectName(_In_ ID3D11DeviceChild* resource, _In_z_ const char *name);
+
 ID3D11Device* getDevice();
 
 ID3D11DeviceContext* getImmediateContext();

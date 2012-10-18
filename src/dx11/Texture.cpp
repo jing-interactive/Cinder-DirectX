@@ -159,9 +159,7 @@ HRESULT Texture::init(const void* pBitData, const Format &format )
 
 	ID3D11Texture2D* pTex2D = NULL;
 	V_RETURN(dx11::getDevice()->CreateTexture2D( &desc, pInitData, &pTex2D ));
-#ifdef _DEBUG
-//	pTex2D->SetPrivateData( WKPDID_D3DDebugObjectName, sizeof("dx11::Texture::init")-1, "dx11::Texture::init" );
-#endif
+
 	CD3D11_SHADER_RESOURCE_VIEW_DESC SRVDesc(D3D_SRV_DIMENSION_TEXTURE2D, desc.Format);
 	//TODO
 	//SRVDesc.Texture2D.MipLevels = desc.MipLevels;

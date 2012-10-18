@@ -3,6 +3,7 @@
 #pragma comment( lib, "dxerr.lib" )
 #pragma comment( lib, "d3d11.lib" )
 #pragma comment( lib, "d3dcompiler.lib" )
+#pragma comment( lib, "dxguid.lib" )
 
 #include "cinder/CinderMath.h"
 #include "cinder/Vector.h"
@@ -38,6 +39,13 @@ ID3D11Device* getDevice()
 ID3D11DeviceContext* getImmediateContext()
 {
     return g_immediateContex;
+}
+
+void setDebugObjectName(_In_ ID3D11DeviceChild* resource, _In_z_ const char *name)
+{
+  #if defined(_DEBUG)
+     resource->SetPrivateData(WKPDID_D3DDebugObjectName, strlen(name) - 1, name);
+  #endif
 }
 
 void clear( const ColorA &color, bool clearDepthBuffer, float clearZ)
