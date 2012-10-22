@@ -130,7 +130,7 @@ void RendererDX11::setup( App *aApp, HWND wnd, HDC dc )
 	// target formats, so we only need to check quality support.
 
     UINT m4xMsaaQuality;
-	V(md3dDevice->CheckMultisampleQualityLevels(
+	HR(md3dDevice->CheckMultisampleQualityLevels(
 		DXGI_FORMAT_R8G8B8A8_UNORM, 4, &m4xMsaaQuality));
 	assert( m4xMsaaQuality > 0 );
 
@@ -171,15 +171,15 @@ void RendererDX11::setup( App *aApp, HWND wnd, HDC dc )
 	// This function is being called with a device from a different IDXGIFactory."
 
 	IDXGIDevice* dxgiDevice = 0;
-	V(md3dDevice->QueryInterface(__uuidof(IDXGIDevice), (void**)&dxgiDevice));
+	HR(md3dDevice->QueryInterface(__uuidof(IDXGIDevice), (void**)&dxgiDevice));
 	      
 	IDXGIAdapter* dxgiAdapter = 0;
-	V(dxgiDevice->GetParent(__uuidof(IDXGIAdapter), (void**)&dxgiAdapter));
+	HR(dxgiDevice->GetParent(__uuidof(IDXGIAdapter), (void**)&dxgiAdapter));
 
 	IDXGIFactory* dxgiFactory = 0;
-	V(dxgiAdapter->GetParent(__uuidof(IDXGIFactory), (void**)&dxgiFactory));
+	HR(dxgiAdapter->GetParent(__uuidof(IDXGIFactory), (void**)&dxgiFactory));
 
-	V(dxgiFactory->CreateSwapChain(md3dDevice, &sd, &mSwapChain));
+	HR(dxgiFactory->CreateSwapChain(md3dDevice, &sd, &mSwapChain));
 	
 	SAFE_RELEASE(dxgiDevice);
 	SAFE_RELEASE(dxgiAdapter);
@@ -263,7 +263,7 @@ void RendererDX11::startDraw()
 
 void RendererDX11::finishDraw()
 {
-    V(mSwapChain->Present(0, 0));
+    HR(mSwapChain->Present(0, 0));
 }
 
 void RendererDX11::defaultResize()
@@ -284,10 +284,10 @@ void RendererDX11::defaultResize()
 
 	// Resize the swap chain and recreate the render target view.
 
-	V(mSwapChain->ResizeBuffers(1, mApp->getWindowWidth(), mApp->getWindowHeight(), DXGI_FORMAT_R8G8B8A8_UNORM, 0));
+	HR(mSwapChain->ResizeBuffers(1, mApp->getWindowWidth(), mApp->getWindowHeight(), DXGI_FORMAT_R8G8B8A8_UNORM, 0));
 	ID3D11Texture2D* backBuffer;
-	V(mSwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), reinterpret_cast<void**>(&backBuffer)));
-	V(md3dDevice->CreateRenderTargetView(backBuffer, 0, &mRenderTargetView));
+	HR(mSwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), reinterpret_cast<void**>(&backBuffer)));
+	HR(md3dDevice->CreateRenderTargetView(backBuffer, 0, &mRenderTargetView));
 	SAFE_RELEASE(backBuffer);
 
 	// Create the depth/stencil buffer and view.
@@ -318,8 +318,8 @@ void RendererDX11::defaultResize()
 	depthStencilDesc.CPUAccessFlags = 0; 
 	depthStencilDesc.MiscFlags      = 0;
 
-	V(md3dDevice->CreateTexture2D(&depthStencilDesc, 0, &mDepthStencilBuffer));
-	V(md3dDevice->CreateDepthStencilView(mDepthStencilBuffer, 0, &mDepthStencilView));
+	HR(md3dDevice->CreateTexture2D(&depthStencilDesc, 0, &mDepthStencilBuffer));
+	HR(md3dDevice->CreateDepthStencilView(mDepthStencilBuffer, 0, &mDepthStencilView));
 
 
 	// Bind the render target view and depth/stencil view to the pipeline.

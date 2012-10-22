@@ -95,7 +95,7 @@ void SdkMesh::load( uint32_t iMesh, VboMesh* target ) const
 	uint32_t iVB = 0;//TODO: more general
 	std::vector<D3D11_INPUT_ELEMENT_DESC> dx11_elements;
 	D3DVERTEXELEMENT9* dx9_elements = mSdkMesh->GetVertexElements(iMesh, iVB);
-	V(ConvertDeclaration(dx9_elements, dx11_elements));
+	HR(ConvertDeclaration(dx9_elements, dx11_elements));
 
 	void* pVertices = static_cast<void*>(mSdkMesh->GetRawVerticesAt(iVB));
 	size_t nVertices = mSdkMesh->GetNumVertices(iMesh, iVB);

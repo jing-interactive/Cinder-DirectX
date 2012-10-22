@@ -33,37 +33,13 @@ static HRESULT createEffect(DataSourceRef datasrc, ID3DX11Effect** pEffect)
 	HRESULT hr = E_FAIL;
 	if (datasrc->getBuffer().getDataSize() > 0){
 		ID3DBlob* pShaderBlob = NULL;
-		V(dx11::compileShader(datasrc->getBuffer(), "None", "fx_5_0", &pShaderBlob ));
+		HR(dx11::compileShader(datasrc->getBuffer(), "None", "fx_5_0", &pShaderBlob ));
 
-		V(D3DX11CreateEffectFromMemory(pShaderBlob->GetBufferPointer(),pShaderBlob->GetBufferSize(),
+		HR(D3DX11CreateEffectFromMemory(pShaderBlob->GetBufferPointer(),pShaderBlob->GetBufferSize(),
 			0,	dx11::getDevice(),pEffect));
 		SAFE_RELEASE(pShaderBlob);
 	}
 	return hr;
-}
-
-static void drawWithTechnique(ID3DX11EffectTechnique* tech, UINT VertexCount, UINT StartVertexLocation)
-{
-	HRESULT hr = S_OK;
-	D3DX11_TECHNIQUE_DESC techDesc;
-	tech->GetDesc( &techDesc );
-	for(UINT p = 0; p < techDesc.Passes; ++p)
-	{
-		tech->GetPassByIndex(p)->Apply(0, getImmediateContext());
-		getImmediateContext()->Draw(VertexCount, StartVertexLocation);
-	}
-}
-
-static void drawIndexedWithTechnique(ID3DX11EffectTechnique* tech, UINT IndexCount, UINT StartVertexLocation, INT BaseVertexLocation)
-{
-	HRESULT hr = S_OK;
-	D3DX11_TECHNIQUE_DESC techDesc;
-	tech->GetDesc( &techDesc );
-	for(UINT p = 0; p < techDesc.Passes; ++p)
-	{
-		tech->GetPassByIndex(p)->Apply(0, getImmediateContext());
-		getImmediateContext()->DrawIndexed(IndexCount, StartVertexLocation, BaseVertexLocation);
-	}
 }
 
 HlslEffect::Obj::~Obj()
@@ -77,7 +53,7 @@ HlslEffect::Obj::~Obj()
 	: mObj( shared_ptr<Obj>( new Obj ) )
 {
 	HRESULT hr = S_OK;
-	V(dx11::createEffect(effect, &mObj->mHandle));
+	HR(dx11::createEffect(effect, &mObj->mHandle));
 	mObj->mCurrentTech = mObj->mHandle->GetTechniqueByIndex(0);
 	assert (mObj->mCurrentTech->IsValid() && "There is no valid technique inside"); 
 }
@@ -85,10 +61,8 @@ HlslEffect::Obj::~Obj()
 void HlslEffect::uniform( const std::string &name, int data )
 {
 	ID3DX11EffectVariable* var = getVariable( name );
-	if (var)
-	{
-		var->AsScalar()->SetInt(data);
-	}
+	assert (var);
+	var->AsScalar()->SetInt(data);
 	//glUniform1i( loc, data );
 }
 
@@ -113,37 +87,29 @@ void HlslEffect::uniform( const std::string &name, const Vec2i *data, int count 
 void HlslEffect::uniform( const std::string &name, float data )
 {
 	ID3DX11EffectVariable* var = getVariable( name );
-	if (var)
-	{
-		var->AsScalar()->SetFloat(data);
-	}
+	assert (var);
+	var->AsScalar()->SetFloat(data);
 }
 
 void HlslEffect::uniform( const std::string &name, const Vec2f &data )
 {
 	ID3DX11EffectVariable* var = getVariable( name );
-	if (var)
-	{
-		var->AsVector()->SetRawValue(&data, 0, sizeof(Vec2f));
-	}
+	assert (var);
+	var->AsVector()->SetRawValue(&data, 0, sizeof(Vec2f));
 }
 
 void HlslEffect::uniform( const std::string &name, const Vec3f &data )
 {
 	ID3DX11EffectVariable* var = getVariable( name );
-	if (var)
-	{
-		var->AsVector()->SetRawValue(&data, 0, sizeof(Vec3f));
-	}
+	assert (var);
+	var->AsVector()->SetRawValue(&data, 0, sizeof(Vec3f));
 }
 
 void HlslEffect::uniform( const std::string &name, const Vec4f &data )
 {
 	ID3DX11EffectVariable* var = getVariable( name );
-	if (var)
-	{
-		var->AsVector()->SetRawValue(&data, 0, sizeof(Vec4f));
-	}
+	assert (var);
+	var->AsVector()->SetRawValue(&data, 0, sizeof(Vec4f));
 }
 
 void HlslEffect::uniform( const std::string &name, const Color &data )
@@ -161,10 +127,8 @@ void HlslEffect::uniform( const std::string &name, const ColorA &data )
 void HlslEffect::uniform( const std::string &name, const float *data, int count )
 {
 	ID3DX11EffectVariable* var = getVariable( name );
-	if (var)
-	{
-		var->SetRawValue((void*)data, 0, count);
-	}
+	assert (var);
+	var->SetRawValue((void*)data, 0, count);
 }
 
 void HlslEffect::uniform( const std::string &name, const Vec2f *data, int count )
@@ -194,23 +158,21 @@ void HlslEffect::uniform( const std::string &name, const Matrix33f &data, bool t
 void HlslEffect::uniform( const std::string &name, const Matrix44f &data, bool transpose )
 {
 	ID3DX11EffectVariable* var = getVariable( name );
-	if (var){
-		ID3DX11EffectMatrixVariable* varM = var->AsMatrix();
-		if (transpose)
-			varM->SetMatrixTranspose(data.m);
-		else
-			varM->SetMatrix(data.m);
-	}
+	assert (var);
+	ID3DX11EffectMatrixVariable* varM = var->AsMatrix();
+	if (transpose)
+		varM->SetMatrixTranspose(data.m);
+	else
+		varM->SetMatrix(data.m);
 	//glUniformMatrix4fv( loc, 1, ( transpose ) ? GL_TRUE : GL_FALSE, data.m );
 }
 
 void HlslEffect::uniform( const std::string &name, ID3D11ShaderResourceView* pSRV )
 {
 	ID3DX11EffectVariable* var = getVariable( name );
-	if (var){
-		ID3DX11EffectShaderResourceVariable* varSRV = var->AsShaderResource();
-		varSRV->SetResource(pSRV);
-	}
+	assert (var);
+	ID3DX11EffectShaderResourceVariable* varSRV = var->AsShaderResource();
+	varSRV->SetResource(pSRV);
 }
 
 
@@ -260,12 +222,38 @@ HRESULT HlslEffect::createInputLayout(const D3D11_INPUT_ELEMENT_DESC *pInputElem
 
 void HlslEffect::draw(UINT VertexCount, UINT StartVertexLocation )
 {
-	dx11::drawWithTechnique(mObj->mCurrentTech, VertexCount, StartVertexLocation);
+	HRESULT hr = S_OK;
+	D3DX11_TECHNIQUE_DESC techDesc;
+	mObj->mCurrentTech->GetDesc( &techDesc );
+	for(UINT p = 0; p < techDesc.Passes; ++p)
+	{
+		mObj->mCurrentTech->GetPassByIndex(p)->Apply(0, getImmediateContext());
+		getImmediateContext()->Draw(VertexCount, StartVertexLocation);
+	}
 }
 
 void HlslEffect::drawIndexed(UINT IndexCount, UINT StartVertexLocation, INT BaseVertexLocation )
 {
-	dx11::drawIndexedWithTechnique(mObj->mCurrentTech, IndexCount, StartVertexLocation, BaseVertexLocation);
+	HRESULT hr = S_OK;
+	D3DX11_TECHNIQUE_DESC techDesc;
+	mObj->mCurrentTech->GetDesc( &techDesc );
+	for(UINT p = 0; p < techDesc.Passes; ++p)
+	{
+		mObj->mCurrentTech->GetPassByIndex(p)->Apply(0, getImmediateContext());
+		getImmediateContext()->DrawIndexed(IndexCount, StartVertexLocation, BaseVertexLocation);
+	}
+}
+
+void HlslEffect::drawAuto()
+{
+	HRESULT hr = S_OK;
+	D3DX11_TECHNIQUE_DESC techDesc;
+	mObj->mCurrentTech->GetDesc( &techDesc );
+	for(UINT p = 0; p < techDesc.Passes; ++p)
+	{
+		mObj->mCurrentTech->GetPassByIndex(p)->Apply(0, getImmediateContext());
+		getImmediateContext()->DrawAuto();
+	}
 }
 
 void HlslEffect::useTechnique( const std::string &name )

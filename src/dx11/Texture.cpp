@@ -1,6 +1,7 @@
 #include "dx11/Texture.h"
 #include "dx11/DDS.h"
 #include "cinder/ImageIo.h"
+#include "cinder/Rand.h"
 
 using namespace std;
 
@@ -13,7 +14,7 @@ mObj( shared_ptr<Obj>( new Obj ) )
 	{
 		UINT support = 0;
 		HRESULT hr = S_OK;
-		V(dx11::getDevice()->CheckFormatSupport(static_cast<DXGI_FORMAT>(imageSource->getChannelOrder()), &support));
+		HR(dx11::getDevice()->CheckFormatSupport(static_cast<DXGI_FORMAT>(imageSource->getChannelOrder()), &support));
 		if (!(support & D3D11_FORMAT_SUPPORT_RENDER_TARGET))
 		{
 			format.enableMipmapping(false);
@@ -182,6 +183,69 @@ int Texture::getWidth() const
 int Texture::getHeight() const
 {
 	return mObj->mHeight;
+}
+
+Texture Texture::createRandom1D(size_t texLength)
+{
+	HRESULT hr = S_OK;
+	// 
+	// Create the random data.
+	//
+	Vec4f* randomValues = new Vec4f[texLength];
+
+	for (size_t i = 0; i < texLength; ++i)
+	{
+		randomValues[i].x = randFloat(-1.0f, 1.0f);
+		randomValues[i].y = randFloat(-1.0f, 1.0f);
+		randomValues[i].z = randFloat(-1.0f, 1.0f);
+		randomValues[i].w = randFloat(-1.0f, 1.0f);
+	}
+
+	D3D11_SUBRESOURCE_DATA initData;
+	initData.pSysMem = randomValues;
+	initData.SysMemPitch = texLength*sizeof(Vec4f);
+	initData.SysMemSlicePitch = 0;
+
+	//
+	// Create the texture.
+	//
+	D3D11_TEXTURE1D_DESC texDesc;
+	texDesc.Width = texLength;
+	texDesc.MipLevels = 1;
+	texDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+	texDesc.Usage = D3D11_USAGE_IMMUTABLE;
+	texDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+	texDesc.CPUAccessFlags = 0;
+	texDesc.MiscFlags = 0;
+	texDesc.ArraySize = 1;
+
+	ID3D11Texture1D* randomTex = 0;
+	HR(getDevice()->CreateTexture1D(&texDesc, &initData, &randomTex));
+
+	delete[] randomValues;
+
+	//
+	// Create the resource view.
+	//
+	D3D11_SHADER_RESOURCE_VIEW_DESC viewDesc;
+	viewDesc.Format = texDesc.Format;
+	viewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE1D;
+	viewDesc.Texture1D.MipLevels = texDesc.MipLevels;
+	viewDesc.Texture1D.MostDetailedMip = 0;
+
+	ID3D11ShaderResourceView* randomTexSRV = 0;
+	getDevice()->CreateShaderResourceView(randomTex, &viewDesc, &randomTexSRV);
+
+	SAFE_RELEASE(randomTex);
+
+	Texture newTex;
+	newTex.mObj = shared_ptr<Obj>(new Obj);
+	newTex.mObj->mWidth = texLength;
+	newTex.mObj->mHeight = 1;
+	newTex.mObj->mInternalFormat = DXGI_FORMAT_R32G32B32A32_FLOAT;
+	newTex.mObj->mSRV = randomTexSRV;
+
+	return newTex;
 }
 
 Texture::Obj::~Obj()

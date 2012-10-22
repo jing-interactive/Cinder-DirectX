@@ -179,6 +179,14 @@ HRESULT compileShader( const Buffer& data, LPCSTR szEntryPoint, LPCSTR szShaderM
 	// the shaders to be optimized and to run exactly the way they will run in 
 	// the release configuration of this program.
 	dwShaderFlags |= D3DCOMPILE_DEBUG;
+
+	//   Instructs the compiler to skip optimization steps during code generation.
+	//   Unless you are trying to isolate a problem in your code using this option 
+	//   is not recommended.
+	dwShaderFlags |= D3DCOMPILE_SKIP_OPTIMIZATION;
+
+	//   Hint compiler to prefer flow-control constructs where possible.
+	dwShaderFlags |= D3DCOMPILE_PREFER_FLOW_CONTROL;
 #endif
 
 	// compiling
@@ -260,9 +268,9 @@ HRESULT createShader(DataSourceRef datasrc, const char* entryName, const char* p
     HRESULT hr = E_FAIL;
 	if (datasrc->getBuffer().getDataSize() > 0){
 		ID3DBlob* pShaderBlob = NULL;
-		V(dx11::compileShader(datasrc->getBuffer(), entryName, profileName, &pShaderBlob ));
+		HR(dx11::compileShader(datasrc->getBuffer(), entryName, profileName, &pShaderBlob ));
 
-		V(dx11::getDevice()->CreateVertexShader( pShaderBlob->GetBufferPointer(), pShaderBlob->GetBufferSize(), NULL, pVertexShader));
+		HR(dx11::getDevice()->CreateVertexShader( pShaderBlob->GetBufferPointer(), pShaderBlob->GetBufferSize(), NULL, pVertexShader));
 
 		if (pBlobOut)
 		{// Add reference
@@ -279,9 +287,9 @@ HRESULT createShader(DataSourceRef datasrc, const char* entryName, const char* p
     HRESULT hr = E_FAIL;
 	if (datasrc->getBuffer().getDataSize() > 0){
 		ID3DBlob* pShaderBlob = NULL;
-		V(dx11::compileShader(datasrc->getBuffer(), entryName, profileName, &pShaderBlob ));
+		HR(dx11::compileShader(datasrc->getBuffer(), entryName, profileName, &pShaderBlob ));
 
-		V(dx11::getDevice()->CreatePixelShader( pShaderBlob->GetBufferPointer(), pShaderBlob->GetBufferSize(),
+		HR(dx11::getDevice()->CreatePixelShader( pShaderBlob->GetBufferPointer(), pShaderBlob->GetBufferSize(),
 			NULL, pPixelShader));
 		SAFE_RELEASE(pShaderBlob);
 	}

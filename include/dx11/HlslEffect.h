@@ -54,6 +54,7 @@ class HlslEffect {
 
 	void draw(UINT VertexCount, UINT StartVertexLocation = 0);
 	void drawIndexed(UINT IndexCount, UINT StartVertexLocation = 0, INT BaseVertexLocation = 0);
+	void drawAuto();
 
 	void	uniform( const std::string &name, ID3D11ShaderResourceView* pSRV );
 

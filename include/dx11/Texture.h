@@ -35,6 +35,8 @@ public:
 
 	Texture( ImageSourceRef imageSource, Format format = Format());
 
+	static Texture createRandom1D(size_t texLength = 1024);
+
 	int getWidth() const;
 	int getHeight() const;
 
