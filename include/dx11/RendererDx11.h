@@ -63,6 +63,7 @@ class RendererDX11 : public Renderer {
 	ID3D11Texture2D* mDepthStencilBuffer;
 	ID3D11RenderTargetView* mRenderTargetView;
 	ID3D11DepthStencilView* mDepthStencilView;
+	ID3D11ShaderResourceView* mDepthSRV;
 
 	HWND        mWnd;
     D3D_DRIVER_TYPE mDevType;

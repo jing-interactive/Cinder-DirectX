@@ -46,6 +46,14 @@ ID3D11Device* getDevice();
 
 ID3D11DeviceContext* getImmediateContext();
 
+ID3D11RenderTargetView* getMainRTV();
+
+ID3D11DepthStencilView* getMainDSV();
+
+ID3D11ShaderResourceView* getDepthSRV();
+
+DXGI_FORMAT getBackBufferFormat();
+
 //! Clears the DX9 color buffer using \a color and optionally clears the depth buffer when \a clearDepthBuffer
 void clear( const ColorA &color = ColorA::black(), bool clearDepthBuffer = true, float clearZValue = 1.0f);
 

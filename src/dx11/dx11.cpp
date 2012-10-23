@@ -25,11 +25,13 @@ HRESULT hr = S_OK;
 
 namespace cinder { namespace dx11 {
 
-ID3D11Device* g_device = NULL;
-ID3D11DeviceContext* g_immediateContex = NULL;
-ID3D11RenderTargetView* g_RenderTargetView = NULL;
-ID3D11DepthStencilView* g_DepthStencilView = NULL;
-HlslEffect*	g_currentEffect = NULL;
+ID3D11Device* g_device;
+ID3D11DeviceContext* g_immediateContex;
+ID3D11RenderTargetView* g_RenderTargetView;
+ID3D11DepthStencilView* g_DepthStencilView;
+ID3D11ShaderResourceView* g_DepthSRV;
+HlslEffect*	g_currentEffect;
+DXGI_FORMAT g_backBufferFormat;
 
 ID3D11Device* getDevice()
 {
@@ -39,6 +41,26 @@ ID3D11Device* getDevice()
 ID3D11DeviceContext* getImmediateContext()
 {
     return g_immediateContex;
+}
+
+ID3D11RenderTargetView* getMainRTV()
+{
+	return g_RenderTargetView;
+}
+
+ID3D11DepthStencilView* getMainDSV()
+{
+	return g_DepthStencilView;
+}
+
+ID3D11ShaderResourceView* getDepthSRV()
+{
+	return g_DepthSRV;
+}
+
+DXGI_FORMAT getBackBufferFormat()
+{
+	return g_backBufferFormat;
 }
 
 void setDebugObjectName(_In_ ID3D11DeviceChild* resource, _In_z_ const char *name)

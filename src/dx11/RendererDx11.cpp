@@ -38,6 +38,8 @@ extern ID3D11Device* g_device;
 extern ID3D11DeviceContext* g_immediateContex;
 extern ID3D11RenderTargetView* g_RenderTargetView;
 extern ID3D11DepthStencilView* g_DepthStencilView;
+extern ID3D11ShaderResourceView* g_DepthSRV;
+extern DXGI_FORMAT g_backBufferFormat;
 }}
 
 namespace cinder { namespace app {
@@ -48,17 +50,17 @@ const int RendererDX11::sAntiAliasingSamples[] = { 0, 2, 4, 6, 8, 16, 32 };
 
 const char* getDescription(D3D_FEATURE_LEVEL featureLevel)
 {
-    switch (featureLevel)
-    {
-    CASE_RETURN(D3D_FEATURE_LEVEL_9_1);
-    CASE_RETURN(D3D_FEATURE_LEVEL_9_2);
-    CASE_RETURN(D3D_FEATURE_LEVEL_9_3);
-    CASE_RETURN(D3D_FEATURE_LEVEL_10_0);
-    CASE_RETURN(D3D_FEATURE_LEVEL_10_1);
-    CASE_RETURN(D3D_FEATURE_LEVEL_11_0);
-    default:
-        return "Wrong D3D_FEATURE_LEVEL!";
-    }
+	switch (featureLevel)
+	{
+		CASE_RETURN(D3D_FEATURE_LEVEL_9_1);
+		CASE_RETURN(D3D_FEATURE_LEVEL_9_2);
+		CASE_RETURN(D3D_FEATURE_LEVEL_9_3);
+		CASE_RETURN(D3D_FEATURE_LEVEL_10_0);
+		CASE_RETURN(D3D_FEATURE_LEVEL_10_1);
+		CASE_RETURN(D3D_FEATURE_LEVEL_11_0);
+	default:
+		return "Wrong D3D_FEATURE_LEVEL!";
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -72,6 +74,7 @@ RendererDX11::RendererDX11( int aAntiAliasing )
 	mDepthStencilBuffer = NULL;
 	mRenderTargetView = NULL;
 	mDepthStencilView = NULL;
+	mDepthSRV = NULL;
 }
 
 void RendererDX11::setAntiAliasing( int aAntiAliasing )
@@ -199,6 +202,7 @@ void RendererDX11::kill()
 	SAFE_RELEASE(mRenderTargetView);
 	SAFE_RELEASE(mDepthStencilView);
     SAFE_RELEASE(mDepthStencilBuffer);
+	SAFE_RELEASE(mDepthSRV);
 	SAFE_RELEASE(mSwapChain);
 
     // Restore all default settings.
@@ -298,7 +302,7 @@ void RendererDX11::defaultResize()
 	depthStencilDesc.Height    = mApp->getWindowHeight();
 	depthStencilDesc.MipLevels = 1;
 	depthStencilDesc.ArraySize = 1;
-	depthStencilDesc.Format    = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	depthStencilDesc.Format    = DXGI_FORMAT_R32_TYPELESS;//DXGI_FORMAT_D24_UNORM_S8_UINT;
 
 	// Use 4X MSAA? --must match swap chain MSAA values.
 	if( mAntiAliasing > 0 )
@@ -314,33 +318,35 @@ void RendererDX11::defaultResize()
 	}
 
 	depthStencilDesc.Usage          = D3D11_USAGE_DEFAULT;
-	depthStencilDesc.BindFlags      = D3D11_BIND_DEPTH_STENCIL;
+	depthStencilDesc.BindFlags      = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
 	depthStencilDesc.CPUAccessFlags = 0; 
 	depthStencilDesc.MiscFlags      = 0;
 
 	HR(md3dDevice->CreateTexture2D(&depthStencilDesc, 0, &mDepthStencilBuffer));
-	HR(md3dDevice->CreateDepthStencilView(mDepthStencilBuffer, 0, &mDepthStencilView));
 
+	CD3D11_DEPTH_STENCIL_VIEW_DESC dsvDesc(mAntiAliasing > 0 ? D3D11_DSV_DIMENSION_TEXTURE2DMS : D3D11_DSV_DIMENSION_TEXTURE2D, DXGI_FORMAT_D32_FLOAT);
+	HR(md3dDevice->CreateDepthStencilView(mDepthStencilBuffer, &dsvDesc, &mDepthStencilView));
+
+	CD3D11_SHADER_RESOURCE_VIEW_DESC srvDesc(mAntiAliasing > 0 ? D3D11_SRV_DIMENSION_TEXTURE2DMS:D3D11_SRV_DIMENSION_TEXTURE2D, DXGI_FORMAT_R32_FLOAT, 0, 1);
+	HR(md3dDevice->CreateShaderResourceView(mDepthStencilBuffer, &srvDesc, &mDepthSRV));
 
 	// Bind the render target view and depth/stencil view to the pipeline.
-
 	md3dImmediateContext->OMSetRenderTargets(1, &mRenderTargetView, mDepthStencilView);
 	
 
 	// Set the viewport transform.
-    D3D11_VIEWPORT viewport;
-	viewport.TopLeftX = 0;
-	viewport.TopLeftY = 0;
-	viewport.Width    = static_cast<float>(mApp->getWindowWidth());
-	viewport.Height   = static_cast<float>(mApp->getWindowHeight());
-	viewport.MinDepth = 0.0f;
-	viewport.MaxDepth = 1.0f;
+    CD3D11_VIEWPORT viewport(0.0f, 0.0f, 
+		static_cast<float>(mApp->getWindowWidth()), 
+		static_cast<float>(mApp->getWindowHeight())
+		);
 
 	md3dImmediateContext->RSSetViewports(1, &viewport);
 
     // assign to global ones
     dx11::g_RenderTargetView = mRenderTargetView;
     dx11::g_DepthStencilView = mDepthStencilView;
+	dx11::g_DepthSRV = mDepthSRV;
+	dx11::g_backBufferFormat = DXGI_FORMAT_R8G8B8A8_UNORM;
 }
 
 Surface	RendererDX11::copyWindowSurface( const Area &area )
