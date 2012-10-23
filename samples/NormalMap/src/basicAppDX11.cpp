@@ -22,7 +22,7 @@ public:
 		effect = dx11::HlslEffect(loadAsset(L"Lighting.fx"));
 		effect.useTechnique("LightTechNormalMap");
 	
-		ObjLoader loader(loadAsset("wc1.obj"));
+		//ObjLoader loader(loadAsset("wc1.obj"));
 		//loader.load(&mesh, boost::tribool::true_value);
 		mesh.read(loadAsset("ducky.msh"));
 		vboMesh = dx11::VboMesh(mesh, true);
@@ -73,7 +73,7 @@ public:
 	{
 		// animate our little ducky
 		mTransform.setToIdentity();
-		mTransform.scale(3);
+		mTransform.scale(Vec3f(1.5f,1.5f,1.5f));
 		Matrix44f rot = mArcball.getQuat().toMatrix44();
 		mTransform *= rot;
 

@@ -4,7 +4,9 @@
 #include "dx11/Vbo.h"
 #include "cinder/app/App.h"
 
-HRESULT hr = S_OK;
+namespace{
+	HRESULT hr = S_OK;
+}
 
 namespace cinder { namespace dx11{
 

@@ -35,7 +35,7 @@ class App;
 
 class RendererDX11 : public Renderer {
  public:
-	RendererDX11(int aAntiAliasing = 0);
+	RendererDX11(int aAntiAliasing = 1);
   
 	virtual void	setup( App *aApp, HWND wnd, HDC dc );
 	virtual void	kill();
