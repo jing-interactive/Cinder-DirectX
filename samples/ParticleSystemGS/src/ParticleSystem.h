@@ -33,6 +33,10 @@ public:
 		DataSourceRef dataTexture, 
 		size_t maxParticles);
 
+	void Init(HlslEffect effect, 
+		Texture dataTexture, 
+		size_t maxParticles);
+
 	void Reset();
 	void Update(float gameTime);
 	void Draw(const Camera& cam);

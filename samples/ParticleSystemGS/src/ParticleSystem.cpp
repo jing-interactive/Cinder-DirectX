@@ -21,15 +21,6 @@ struct Vertex {
 	uint32_t Type; 
 };
 
-const D3D11_INPUT_ELEMENT_DESC elements[5] = 
-{
-	{"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,  0, D3D11_INPUT_PER_VERTEX_DATA, 0},
-	{"VELOCITY", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0},
-	{"SIZE",     0, DXGI_FORMAT_R32G32_FLOAT,    0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0},
-	{"AGE",      0, DXGI_FORMAT_R32_FLOAT,       0, 32, D3D11_INPUT_PER_VERTEX_DATA, 0},
-	{"TYPE",     0, DXGI_FORMAT_R32_UINT,        0, 36, D3D11_INPUT_PER_VERTEX_DATA, 0},
-};
-
 ParticleSystem::ParticleSystem()
 : mInitVB(0), mDrawVB(0), mStreamOutVB(0)
 {
@@ -69,12 +60,27 @@ void ParticleSystem::Init(DataSourceRef effect,
 						  DataSourceRef texArraySRV,
 						  size_t maxParticles)
 {
+	Init(HlslEffect(effect), Texture(loadImage(texArraySRV)), maxParticles);
+}
+
+void ParticleSystem::Init( HlslEffect effect, Texture dataTexture, size_t maxParticles )
+{
+	mFX = effect;
+
+	mTexure  = dataTexture;
+
 	mMaxParticles = maxParticles;
 
-	mFX = HlslEffect(effect);
-
-	mTexure  = Texture(loadImage(texArraySRV));
 	mRandomTex = Texture::createRandom1D();
+
+	const D3D11_INPUT_ELEMENT_DESC elements[5] = 
+	{
+		{"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,  0, D3D11_INPUT_PER_VERTEX_DATA, 0},
+		{"VELOCITY", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0},
+		{"SIZE",     0, DXGI_FORMAT_R32G32_FLOAT,    0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0},
+		{"AGE",      0, DXGI_FORMAT_R32_FLOAT,       0, 32, D3D11_INPUT_PER_VERTEX_DATA, 0},
+		{"TYPE",     0, DXGI_FORMAT_R32_UINT,        0, 36, D3D11_INPUT_PER_VERTEX_DATA, 0},
+	};
 
 	HR(mFX.createInputLayout(elements, ARRAYSIZE(elements), &mInputLayout));
 	BuildVB();
