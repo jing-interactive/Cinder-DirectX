@@ -22,7 +22,7 @@ public:
 	{
 		effect = dx11::HlslEffect(loadAsset(L"Lighting.fx"));
 
-		ObjLoader loader(loadAsset("apple.obj"));
+		ObjLoader loader(loadAsset("apple.obj"), loadAsset("apple.mtl"));
 		loader.load(&duck, boost::tribool::true_value);
 		//duck.read(loadAsset("apple.obj"));
 		vboDuck = dx11::VboMesh(duck);

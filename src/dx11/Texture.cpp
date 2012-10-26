@@ -1,11 +1,32 @@
 #include "dx11/Texture.h"
 #include "dx11/DDS.h"
-#include "cinder/ImageIo.h"
 #include "cinder/Rand.h"
+#include "cinder/ImageIo.h"
 
 using namespace std;
 
 namespace cinder { namespace dx11 {
+
+/////////////////////////////////////////////////////////////////////////////////
+// ImageTargetDXTexture
+template<typename T>
+class ImageTargetDXTexture : public ImageTarget {
+public:
+	static std::shared_ptr<ImageTargetDXTexture> createRef( const Texture *aTexture, ImageIo::ChannelOrder &aChannelOrder, bool aIsGray, bool aHasAlpha );
+	~ImageTargetDXTexture();
+
+	virtual bool	hasAlpha() const { return mHasAlpha; }
+	virtual void*	getRowPointer( int32_t row ) { return mData + row * mRowInc; }
+
+private:
+	ImageTargetDXTexture( const Texture *aTexture, ImageIo::ChannelOrder &aChannelOrder, bool aIsGray, bool aHasAlpha );
+	const Texture		*mTexture;
+	bool				mIsGray;
+	bool				mHasAlpha;
+	uint8_t				mPixelInc;
+	T					*mData;
+	int					mRowInc;
+};
 
 Texture::Texture( ImageSourceRef imageSource, Format format/* = Format() */):
 mObj( shared_ptr<Obj>( new Obj ) )
@@ -23,34 +44,20 @@ mObj( shared_ptr<Obj>( new Obj ) )
 	init(imageSource, format);
 }
 
-
-/////////////////////////////////////////////////////////////////////////////////
-// ImageTargetDXTexture
-template<typename T>
-class ImageTargetDXTexture : public ImageTarget {
-public:
-	static shared_ptr<ImageTargetDXTexture> createRef( const Texture *aTexture, ImageIo::ChannelOrder &aChannelOrder, bool aIsGray, bool aHasAlpha );
-	~ImageTargetDXTexture();
-
-	virtual bool	hasAlpha() const { return mHasAlpha; }
-	virtual void*	getRowPointer( int32_t row ) { return mData + row * mRowInc; }
-
-	const void*		getData() const { return mData; }
-
-private:
-	ImageTargetDXTexture( const Texture *aTexture, ImageIo::ChannelOrder &aChannelOrder, bool aIsGray, bool aHasAlpha );
-	const Texture		*mTexture;
-	bool				mIsGray;
-	bool				mHasAlpha;
-	uint8_t				mPixelInc;
-	T					*mData;
-	int					mRowInc;
-};
-
 void Texture::init( ImageSourceRef imageSource, const Format &format  )
 {
-	mObj->mWidth = imageSource->getWidth();
-	mObj->mHeight = imageSource->getHeight();
+	int32_t w = imageSource->getWidth();
+	int32_t h = imageSource->getHeight();
+
+	//HACK!!
+	if (w > 10000 && h > 100000)
+	{
+		mObj->mArraySize = w/10000;
+		mObj->mWidth = w%10000;
+
+		mObj->mMipLevels = h/100000;
+		mObj->mHeight = h%100000;
+	}
 
 	// Set the internal format based on the image's color space
 	ImageIo::ChannelOrder channelOrder;
@@ -99,17 +106,17 @@ void Texture::init( ImageSourceRef imageSource, const Format &format  )
 	if( imageSource->getDataType() == ImageIo::UINT8 ) {
 		shared_ptr<ImageTargetDXTexture<uint8_t> > target = ImageTargetDXTexture<uint8_t>::createRef( this, channelOrder, isGray, true );
 		imageSource->load( target );
-		init(target->getData(), format);
+		init(target->getRowPointer(0), format);
 	}
 	else if( imageSource->getDataType() == ImageIo::UINT16 ) {
 		shared_ptr<ImageTargetDXTexture<uint16_t> > target = ImageTargetDXTexture<uint16_t>::createRef( this, channelOrder, isGray, true );
 		imageSource->load( target );
-		init(target->getData(), format);
+		init(target->getRowPointer(0), format);
 	}
 	else {
 		shared_ptr<ImageTargetDXTexture<float> > target = ImageTargetDXTexture<float>::createRef( this, channelOrder, isGray, true );
 		imageSource->load( target );
-		init(target->getData(), format);
+		init(target->getRowPointer(0), format);
 	}
 }
 
@@ -119,9 +126,9 @@ HRESULT Texture::init(const void* pBitData, const Format &format )
 	// Create the texture 
 	CD3D11_TEXTURE2D_DESC desc(mObj->mInternalFormat, mObj->mWidth, mObj->mHeight);
 	//TODO: supports more fields
-	desc.MipLevels = 1;
-	desc.ArraySize = 1;
-	if (format.hasMipmapping())
+	desc.MipLevels = mObj->mMipLevels;
+	desc.ArraySize = mObj->mArraySize;
+	if (format.hasMipmapping() && desc.MipLevels == 1)
 	{
 		desc.BindFlags |=  D3D11_BIND_RENDER_TARGET;
 		desc.MiscFlags = D3D11_RESOURCE_MISC_GENERATE_MIPS;
@@ -166,7 +173,7 @@ HRESULT Texture::init(const void* pBitData, const Format &format )
 	//SRVDesc.Texture2D.MipLevels = desc.MipLevels;
 	V_RETURN(dx11::getDevice()->CreateShaderResourceView( pTex2D, &SRVDesc, &mObj->mSRV));
 
-	if (format.hasMipmapping())
+	if (format.hasMipmapping() && desc.MipLevels == 1 )
 		dx11::getImmediateContext()->GenerateMips(mObj->mSRV);
 	SAFE_RELEASE( pTex2D );
 
@@ -259,7 +266,7 @@ Texture::Obj::~Obj()
 template<typename T>
 shared_ptr<ImageTargetDXTexture<T> > ImageTargetDXTexture<T>::createRef( const Texture *aTexture, ImageIo::ChannelOrder &aChannelOrder, bool aIsGray, bool aHasAlpha )
 {
-	return shared_ptr<ImageTargetDXTexture<T> >( new ImageTargetDXTexture<T>( aTexture, aChannelOrder, aIsGray, aHasAlpha ) );
+	return shared_ptr<ImageTargetDXTexture<T> >( new ImageTargetDXTexture<T>( aTexture, aChannelOrder, aIsGray, aHasAlpha) );
 }
 
 template<typename T>

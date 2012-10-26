@@ -10,11 +10,13 @@ class Texture
 {
 private:
 	struct Obj {
-		Obj() : mSRV(NULL),mWidth(-1),mHeight(-1),mInternalFormat(DXGI_FORMAT_UNKNOWN){}
+		Obj() : mSRV(NULL),mWidth(0),mHeight(0),mInternalFormat(DXGI_FORMAT_UNKNOWN),mMipLevels(1), mArraySize(1){}
 		~Obj();
 		ID3D11ShaderResourceView* mSRV;
-		int mWidth;
-		int mHeight;
+		uint32_t mWidth;
+		uint32_t mHeight;
+		uint32_t mMipLevels;
+		uint32_t mArraySize;
 		DXGI_FORMAT mInternalFormat;
 	};
 

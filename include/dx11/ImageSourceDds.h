@@ -55,6 +55,8 @@ class ImageSourceDds : public ImageSource {
 	size_t mRowBytes;
 
 	DXGI_FORMAT mFormat;
+	uint32_t mMipLevels;
+	uint32_t mArraySize;
 };
 
 REGISTER_IMAGE_IO_FILE_HANDLER( ImageSourceDds )

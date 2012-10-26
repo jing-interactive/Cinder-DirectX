@@ -22,6 +22,7 @@ POSSIBILITY OF SUCH DAMAGE.
 
 #include "dx11/DDS.h"
 #include "dx11/ImageSourceDds.h"
+#include "dx11/Texture.h"
 #include "dx11/V.h"
 
 using namespace std;
@@ -44,7 +45,8 @@ namespace cinder {
 	}
 
 	ImageSourceDds::ImageSourceDds( DataSourceRef dataSourceRef, ImageSource::Options /*options*/ )
-		: ImageSource(), pHeapData( 0 ), pHeader( 0 ), mData(0), mDataSize(0), mFormat(DXGI_FORMAT_UNKNOWN), mRowBytes(0)
+		: ImageSource(), pHeapData( 0 ), pHeader( 0 ), mData(0), mDataSize(0), 
+		mFormat(DXGI_FORMAT_UNKNOWN), mRowBytes(0), mMipLevels(1), mArraySize(1)
 	{
 		if( ! loadData(dataSourceRef) || ! processData())
 			throw ImageSourceDdsException();		
@@ -165,15 +167,17 @@ namespace cinder {
 // 			((*this).*func)( target, row, data );
 // 			data += mRowBytes;
 // 		}
-		void* targetDataPtr = target->getRowPointer(0);
+		uint8_t* targetDataPtr = (uint8_t*)target->getRowPointer(0);
+		delete[] targetDataPtr;
+		targetDataPtr = new uint8_t[mDataSize];
 		memcpy(targetDataPtr, mData, mDataSize);
 	}
 
 	bool ImageSourceDds::processData()
-	{
-		UINT iMipCount = pHeader->dwMipMapCount;
-
+	{		
 		D3D11_TEXTURE2D_DESC desc;
+		desc.MipLevels = pHeader->dwMipMapCount;
+
 		if ((  pHeader->ddspf.dwFlags & DDS_FOURCC )
 			&& (MAKEFOURCC( 'D', 'X', '1', '0' ) == pHeader->ddspf.dwFourCC ) )
 		{
@@ -236,7 +240,11 @@ namespace cinder {
 		}
 
 		mFormat = desc.Format;
-		setSize( pHeader->dwWidth, pHeader->dwHeight);
+		mMipLevels = desc.MipLevels;
+		mArraySize = desc.ArraySize;
+
+		//HACK: VERY DIRTY!!!
+		setSize( pHeader->dwWidth + 10000*mArraySize, pHeader->dwHeight + 100000*mMipLevels);
 
 		GetSurfaceInfo(pHeader->dwWidth, pHeader->dwHeight, mFormat, NULL, &mRowBytes, NULL);
 		setDataType(ImageIo::UINT8 );
