@@ -151,7 +151,7 @@ void RendererDX11::setup( App *aApp, HWND wnd, HDC dc )
 	// Use 4X MSAA? 
 	if( mAntiAliasing > 0 )
 	{
-		sd.SampleDesc.Count   = 4;
+		sd.SampleDesc.Count   = mAntiAliasing;
 		sd.SampleDesc.Quality = 0;
 	}
 	// No MSAA
@@ -307,7 +307,7 @@ void RendererDX11::defaultResize()
 	// Use 4X MSAA? --must match swap chain MSAA values.
 	if( mAntiAliasing > 0 )
 	{
-		depthStencilDesc.SampleDesc.Count   = 4;
+		depthStencilDesc.SampleDesc.Count   = mAntiAliasing;
 		depthStencilDesc.SampleDesc.Quality = 0;
 	}
 	// No MSAA
@@ -327,7 +327,7 @@ void RendererDX11::defaultResize()
 	CD3D11_DEPTH_STENCIL_VIEW_DESC dsvDesc(mAntiAliasing > 0 ? D3D11_DSV_DIMENSION_TEXTURE2DMS : D3D11_DSV_DIMENSION_TEXTURE2D, DXGI_FORMAT_D32_FLOAT);
 	HR(md3dDevice->CreateDepthStencilView(mDepthStencilBuffer, &dsvDesc, &mDepthStencilView));
 
-	CD3D11_SHADER_RESOURCE_VIEW_DESC srvDesc(mAntiAliasing > 0 ? D3D11_SRV_DIMENSION_TEXTURE2DMS:D3D11_SRV_DIMENSION_TEXTURE2D, DXGI_FORMAT_R32_FLOAT, 0, 1);
+	CD3D11_SHADER_RESOURCE_VIEW_DESC srvDesc(mAntiAliasing > 0 ? D3D11_SRV_DIMENSION_TEXTURE2DMS : D3D11_SRV_DIMENSION_TEXTURE2D, DXGI_FORMAT_R32_FLOAT, 0, 1);
 	HR(md3dDevice->CreateShaderResourceView(mDepthStencilBuffer, &srvDesc, &mDepthSRV));
 
 	// Bind the render target view and depth/stencil view to the pipeline.
