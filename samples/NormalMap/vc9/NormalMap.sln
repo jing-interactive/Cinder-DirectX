@@ -8,8 +8,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NormalMap", "basicApp.vcpro
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cinder", "..\..\..\..\..\vc9\cinder.vcproj", "{92B5BE70-DCAA-40E4-92D8-CC2B95AA28BE}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Effects11", "..\..\..\Effects11\Effects11_2008.vcproj", "{DF460EAB-570D-4B50-9089-2E2FC801BF38}"
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CinderDirectX", "..\..\..\lib\proj\CinderDirectX.vcproj", "{68FA3413-92CB-4CF5-856E-7CE7C0919C72}"
 EndProject
 Global
@@ -26,10 +24,6 @@ Global
 		{92B5BE70-DCAA-40E4-92D8-CC2B95AA28BE}.Debug|Win32.Build.0 = Debug|Win32
 		{92B5BE70-DCAA-40E4-92D8-CC2B95AA28BE}.Release|Win32.ActiveCfg = Release|Win32
 		{92B5BE70-DCAA-40E4-92D8-CC2B95AA28BE}.Release|Win32.Build.0 = Release|Win32
-		{DF460EAB-570D-4B50-9089-2E2FC801BF38}.Debug|Win32.ActiveCfg = Debug|Win32
-		{DF460EAB-570D-4B50-9089-2E2FC801BF38}.Debug|Win32.Build.0 = Debug|Win32
-		{DF460EAB-570D-4B50-9089-2E2FC801BF38}.Release|Win32.ActiveCfg = Release|Win32
-		{DF460EAB-570D-4B50-9089-2E2FC801BF38}.Release|Win32.Build.0 = Release|Win32
 		{68FA3413-92CB-4CF5-856E-7CE7C0919C72}.Debug|Win32.ActiveCfg = Debug|Win32
 		{68FA3413-92CB-4CF5-856E-7CE7C0919C72}.Debug|Win32.Build.0 = Debug|Win32
 		{68FA3413-92CB-4CF5-856E-7CE7C0919C72}.Release|Win32.ActiveCfg = Release|Win32

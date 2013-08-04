@@ -1,12 +1,14 @@
 #include "cinder/app/AppBasic.h"
 #include "cinder/Utilities.h"
-#include "dx11/RendererDx11.h"
-#include "dx11/Vbo.h"
-#include "dx11/LightHelper.h"
-#include "dx11/Texture.h"
 #include "cinder/ImageIo.h"
 #include "cinder/Arcball.h"
 #include "cinder/ObjLoader.h"
+
+#include "dx11/RendererDx11.h"
+#include "dx11/Vbo.h"
+#include "dx11/Light.h"
+#include "dx11/Texture.h"
+#include "dx11/Shader.h"
 
 using namespace ci;
 using namespace ci::app; 
@@ -19,14 +21,14 @@ class BasicApp : public AppBasic {
 public:
 	void setup()
 	{
-		effect = dx11::HlslEffect(loadAsset(L"Lighting.fx"));
-		effect.useTechnique("LightTechNormalMap");
-	
+        mVS = dx11::Shader::create(dx11::Shader_VS, loadAsset("Lighting.fx"), "VS");
+        mPS = dx11::Shader::create(dx11::Shader_PS, loadAsset("Lighting.fx"), "PS");
+
 		//ObjLoader loader(loadAsset("wc1.obj"));
 		//loader.load(&mesh, boost::tribool::true_value);
 		mesh.read(loadAsset("ducky.msh"));
 		vboMesh = dx11::VboMesh(mesh, true);
-		vboMesh.createInputLayout(effect);
+		vboMesh.createInputLayout(mVS.get());
 
 		texDiffuse = dx11::Texture(loadImage(loadAsset("ducky.png")));
 		texNormal = dx11::Texture(loadImage(loadAsset("wc1_normal.jpg")));
@@ -49,14 +51,14 @@ public:
 	{
 		if (event.getCode() == KeyEvent::KEY_ESCAPE)
 			quit();
-		if (event.getCode() == KeyEvent::KEY_1)
-		{
-			effect.useTechnique("LightTech");
-		}
-		else if (event.getCode() == KeyEvent::KEY_2)
-		{
-			effect.useTechnique("LightTechNormalMap");
-		}
+		//if (event.getCode() == KeyEvent::KEY_1)
+		//{
+		//	//effect.useTechnique("LightTech");
+		//}
+		//else if (event.getCode() == KeyEvent::KEY_2)
+		//{
+		//	//effect.useTechnique("LightTechNormalMap");
+		//}
 	}
 
 	void mouseDown( MouseEvent event )
@@ -82,26 +84,27 @@ public:
 		mDirLight.Direction.z = sinf( getElapsedSeconds() );
 		mDirLight.Direction.normalize();
 
-		effect.uniform("gDirLight", &mDirLight);
-		effect.uniform("gEyePosW", mCam.getEyePoint());
+		//effect.uniform("gDirLight", &mDirLight);
+		//effect.uniform("gEyePosW", mCam.getEyePoint());
 	}
 
 	void draw()
 	{
 		dx11::clear(ColorA(0.5f, 0.5f, 0.5f));
 
-		effect.bind();
+		mVS->bind();
+        mPS->bind();
 
 		Matrix44f W = mTransform;
 		Matrix44f V = mCam.getModelViewMatrix();
 		Matrix44f P = mCam.getProjectionMatrix();
 		Matrix44f WVP = P*V*W;
-		effect.uniform("gWorld", W);
-		effect.uniform("gWorldViewProj", WVP);
-		effect.uniform("gDiffuseMap", texDiffuse);
-		effect.uniform("gNormalMap", texNormal);
-		effect.uniform("gSpecularMap", texSpecular);
-		effect.uniform("gMaterial", &mtrlDuck);
+		//effect.uniform("gWorld", W);
+		//effect.uniform("gWorldViewProj", WVP);
+		//effect.uniform("gDiffuseMap", texDiffuse);
+		//effect.uniform("gNormalMap", texNormal);
+		//effect.uniform("gSpecularMap", texSpecular);
+		//effect.uniform("gMaterial", &mtrlDuck);
 
 		dx11::draw(vboMesh);
 	}
@@ -128,7 +131,7 @@ private:
 	dx11::VboMesh	vboMesh;
 	dx11::Texture	texDiffuse, texNormal, texSpecular;
 
-	dx11::HlslEffect effect;
+    dx11::ShaderRef mVS, mPS;
 };
 
 CINDER_APP_BASIC( BasicApp, RendererDX11)
