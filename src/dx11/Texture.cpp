@@ -44,7 +44,7 @@ mObj( shared_ptr<Obj>( new Obj ) )
 	init(imageSource, format);
 }
 
-void Texture::init( ImageSourceRef imageSource, const Format &format  )
+void Texture::init( ImageSourceRef imageSource, const Format &format )
 {
 	int32_t w = imageSource->getWidth();
 	int32_t h = imageSource->getHeight();
@@ -58,6 +58,11 @@ void Texture::init( ImageSourceRef imageSource, const Format &format  )
 		mObj->mMipLevels = h/100000;
 		mObj->mHeight = h%100000;
 	}
+    else
+    {
+        mObj->mWidth = w;
+        mObj->mHeight = h;
+    }
 
 	// Set the internal format based on the image's color space
 	ImageIo::ChannelOrder channelOrder;

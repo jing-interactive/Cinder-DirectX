@@ -94,9 +94,11 @@ void RendererDX11::setup( App *aApp, HWND wnd, HDC dc )
 	// Create the device and device context.
 
 	UINT createDeviceFlags = 0;
-#if defined(DEBUG) || defined(_DEBUG)  
-    createDeviceFlags |= D3D11_CREATE_DEVICE_DEBUG;
-#endif
+//#if defined(DEBUG) || defined(_DEBUG)  
+//The latest version of the SDK Debug Layer is not in the legacy DirectX SDK (June 2010) release.
+// http://stackoverflow.com/questions/15180533/e-fail-d3d11createdevice
+//    createDeviceFlags |= D3D11_CREATE_DEVICE_DEBUG;
+//#endif
 
 	D3D_FEATURE_LEVEL featureLevel;
 	HRESULT hr = D3D11CreateDevice(

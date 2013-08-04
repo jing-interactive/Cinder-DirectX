@@ -192,7 +192,8 @@ void VboMesh::bind( D3D_PRIMITIVE_TOPOLOGY Topology /*= D3D11_PRIMITIVE_TOPOLOGY
 
     UINT stride = mObj->mVertexStride;
     UINT offset = 0;
-    dx11::getImmediateContext()->IASetVertexBuffers( 0, 1, &mObj->mVertexBuffer, &stride, &offset );
+    ID3D11Buffer* vextexBuffers[] = {mObj->mVertexBuffer};
+    dx11::getImmediateContext()->IASetVertexBuffers( 0, _countof(vextexBuffers), vextexBuffers, &stride, &offset );
     dx11::getImmediateContext()->IASetIndexBuffer(mObj->mIndexBuffer, mObj->mIBFormat, 0 );
 }
 

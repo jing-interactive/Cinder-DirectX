@@ -69,8 +69,12 @@ size_t VertexShader::getBytecodeLength() const
 
 HRESULT VertexShader::doCreateShader(ID3DBlob* blob, ID3D11DeviceChild** pHandle)
 {
-    return getDevice()->CreateVertexShader(blob->GetBufferPointer(), blob->GetBufferSize(), NULL, 
-        reinterpret_cast<ID3D11VertexShader**>(pHandle));
+    HR( getDevice()->CreateVertexShader(blob->GetBufferPointer(), blob->GetBufferSize(), NULL, 
+        reinterpret_cast<ID3D11VertexShader**>(pHandle)) );
+
+    mShaderBytecode = blob; // make a local copy
+
+    return hr;
 }
 
 void VertexShader::doBind(ID3D11DeviceChild* handle)
