@@ -4,10 +4,8 @@
 // Helper classes for lighting.
 //***************************************************************************************
 
-#ifndef LIGHTHELPER_H
-#define LIGHTHELPER_H
+#pragma 
 
-#include <Windows.h>
 #include "cinder/Vector.h"
 
 namespace cinder { namespace dx11{
@@ -18,8 +16,6 @@ namespace cinder { namespace dx11{
 
 struct DirectionalLight
 {
-	DirectionalLight() { ZeroMemory(this, sizeof(this)); }
-
 	Vec4f Ambient;
 	Vec4f Diffuse;
 	Vec4f Specular;
@@ -29,8 +25,6 @@ struct DirectionalLight
 
 struct PointLight
 {
-	PointLight() { ZeroMemory(this, sizeof(this)); }
-
 	Vec4f Ambient;
 	Vec4f Diffuse;
 	Vec4f Specular;
@@ -46,8 +40,6 @@ struct PointLight
 
 struct SpotLight
 {
-	SpotLight() { ZeroMemory(this, sizeof(this)); }
-
 	Vec4f Ambient;
 	Vec4f Diffuse;
 	Vec4f Specular;
@@ -67,8 +59,6 @@ struct SpotLight
 
 struct Material
 {
-	Material() { ZeroMemory(this, sizeof(this)); }
-
 	Vec4f Ambient;
 	Vec4f Diffuse;
 	Vec4f Specular; // w = SpecPower
@@ -76,4 +66,3 @@ struct Material
 };
 
 }}
-#endif // LIGHTHELPER_H

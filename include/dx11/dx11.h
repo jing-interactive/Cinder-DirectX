@@ -1,5 +1,7 @@
 #pragma once
 
+// TODO: head file is too big
+
 #include "cinder/Cinder.h"
 #include "cinder/Filesystem.h"
 
@@ -8,6 +10,7 @@
 #error The installed DXSDK is out of date.
 #endif
 
+#include <atlbase.h>
 #include <d3d11.h>
 #include <d3dcompiler.h>
 
@@ -21,8 +24,6 @@
 #include "cinder/PolyLine.h"
 #include "cinder/AxisAlignedBox.h"
 #include "cinder/Camera.h"
-
-#include "d3dx11effect.h"
 
 #include "V.h"
 
@@ -50,21 +51,14 @@ ID3D11RenderTargetView* getMainRTV();
 
 ID3D11DepthStencilView* getMainDSV();
 
-ID3D11ShaderResourceView* getDepthSRV();
+ID3D11ShaderResourceView* getMainDepthSRV();
 
 DXGI_FORMAT getBackBufferFormat();
 
 //! Clears the DX9 color buffer using \a color and optionally clears the depth buffer when \a clearDepthBuffer
 void clear( const ColorA &color = ColorA::black(), bool clearDepthBuffer = true, float clearZValue = 1.0f);
 
-HRESULT compileShader(const WCHAR* szFileName, LPCSTR szEntryPoint, LPCSTR szShaderModel, ID3DBlob** ppBlobOut );
-
-HRESULT compileShader(const Buffer& data, LPCSTR szEntryPoint, LPCSTR szShaderModel, ID3DBlob** ppBlobOut );
-
-HRESULT createShader(DataSourceRef datasrc, const char* entryName, const char* profileName, 
-	ID3D11VertexShader** pVertexShader, ID3DBlob** pBlobOut = NULL);
-
-HRESULT createShader(DataSourceRef datasrc, const char* entryName, const char* profileName, ID3D11PixelShader** pPixelShader);
+HRESULT compileShader(const Buffer& data, const std::string& entryName, const std::string& shaderModel, ID3DBlob** ppShaderBytecode);
 
 void blendFunction(D3D11_BLEND  src, D3D11_BLEND dst);
 

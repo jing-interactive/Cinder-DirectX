@@ -1,4 +1,4 @@
-#include "./DXUT/DXUTSDKmesh.h"
+#include "DXUT/DXUTSDKmesh.h"
 #include "dx11/dx11.h"
 #include "dx11/SdkMesh.h"
 #include "dx11/Vbo.h"

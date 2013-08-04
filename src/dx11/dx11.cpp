@@ -30,7 +30,6 @@ ID3D11DeviceContext* g_immediateContex;
 ID3D11RenderTargetView* g_RenderTargetView;
 ID3D11DepthStencilView* g_DepthStencilView;
 ID3D11ShaderResourceView* g_DepthSRV;
-HlslEffect*	g_currentEffect;
 DXGI_FORMAT g_backBufferFormat;
 
 ID3D11Device* getDevice()
@@ -53,7 +52,7 @@ ID3D11DepthStencilView* getMainDSV()
 	return g_DepthStencilView;
 }
 
-ID3D11ShaderResourceView* getDepthSRV()
+ID3D11ShaderResourceView* getMainDepthSRV()
 {
 	return g_DepthSRV;
 }
@@ -190,7 +189,7 @@ public:
 	}
 };
 
-HRESULT compileShader( const Buffer& data, LPCSTR szEntryPoint, LPCSTR szShaderModel, ID3DBlob** ppBlobOut )
+HRESULT compileShader( const Buffer& data, const std::string& entryName, const std::string& shaderModel, ID3DBlob** ppShaderBytecode )
 {
 	HRESULT hr = S_OK;
 
@@ -212,109 +211,21 @@ HRESULT compileShader( const Buffer& data, LPCSTR szEntryPoint, LPCSTR szShaderM
 #endif
 
 	// compiling
-	ID3DBlob* pErrorBlob = NULL;
+	CComPtr<ID3DBlob> pErrorBlob;
 
 	CIncludeHandler includeHandler;
 
 	hr = D3DCompile( data.getData(), data.getDataSize(), NULL,
 		NULL, &includeHandler,
-		szEntryPoint, szShaderModel, 
+		entryName.c_str(), shaderModel.c_str(), 
 		dwShaderFlags, 0, 
-		ppBlobOut, &pErrorBlob);
+		ppShaderBytecode, &pErrorBlob);
 	if( FAILED(hr) )
 	{
 		if( pErrorBlob != NULL )
 			OutputDebugStringA( (char*)pErrorBlob->GetBufferPointer() );
 	}
-	SAFE_RELEASE(pErrorBlob);
 
-	return hr;
-}
-
-HRESULT compileShader(const WCHAR* szFileName, LPCSTR szEntryPoint, LPCSTR szShaderModel, ID3DBlob** ppBlobOut )
-{
-    HRESULT hr = S_OK;
-
-    DWORD dwShaderFlags = D3DCOMPILE_ENABLE_STRICTNESS;
-#if defined( DEBUG ) || defined( _DEBUG )
-    // Set the D3DCOMPILE_DEBUG flag to embed debug information in the shaders.
-    // Setting this flag improves the shader debugging experience, but still allows 
-    // the shaders to be optimized and to run exactly the way they will run in 
-    // the release configuration of this program.
-    dwShaderFlags |= D3DCOMPILE_DEBUG;
-#endif
-
-    // open the file
-    HANDLE hFile = CreateFile( szFileName, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING,
-                               FILE_FLAG_SEQUENTIAL_SCAN, NULL );
-    if( INVALID_HANDLE_VALUE == hFile )
-        return D3D11_ERROR_FILE_NOT_FOUND;
-
-    // Get the file size
-    LARGE_INTEGER FileSize;
-    GetFileSizeEx( hFile, &FileSize );
-
-    // create enough space for the file data
-    BYTE* pFileData = new BYTE[ FileSize.LowPart ];
-    if( !pFileData )
-        return E_OUTOFMEMORY;
-
-    // read the data in
-    DWORD BytesRead;
-    if( !ReadFile( hFile, pFileData, FileSize.LowPart, &BytesRead, NULL ) )
-        return E_FAIL; 
-
-    CloseHandle( hFile );
-
-    // compiling
-    ID3DBlob* pErrorBlob = NULL;
-
-    hr = D3DCompile( pFileData, FileSize.LowPart, NULL,
-        NULL, NULL,
-        szEntryPoint, szShaderModel, 
-        dwShaderFlags, 0, 
-        ppBlobOut, &pErrorBlob);
-    if( FAILED(hr) )
-    {
-        if( pErrorBlob != NULL )
-            OutputDebugStringA( (char*)pErrorBlob->GetBufferPointer() );
-    }
-    SAFE_RELEASE(pErrorBlob);
-
-    return hr;
-}
-
-HRESULT createShader(DataSourceRef datasrc, const char* entryName, const char* profileName, 
-	ID3D11VertexShader** pVertexShader, ID3DBlob** pBlobOut)
-{
-    HRESULT hr = E_FAIL;
-	if (datasrc->getBuffer().getDataSize() > 0){
-		ID3DBlob* pShaderBlob = NULL;
-		HR(dx11::compileShader(datasrc->getBuffer(), entryName, profileName, &pShaderBlob ));
-
-		HR(dx11::getDevice()->CreateVertexShader( pShaderBlob->GetBufferPointer(), pShaderBlob->GetBufferSize(), NULL, pVertexShader));
-
-		if (pBlobOut)
-		{// Add reference
-			pShaderBlob->AddRef();
-			*pBlobOut = pShaderBlob;
-		}
-		SAFE_RELEASE(pShaderBlob);
-	}
-	return hr;
-}
-
-HRESULT createShader(DataSourceRef datasrc, const char* entryName, const char* profileName, ID3D11PixelShader** pPixelShader)
-{
-    HRESULT hr = E_FAIL;
-	if (datasrc->getBuffer().getDataSize() > 0){
-		ID3DBlob* pShaderBlob = NULL;
-		HR(dx11::compileShader(datasrc->getBuffer(), entryName, profileName, &pShaderBlob ));
-
-		HR(dx11::getDevice()->CreatePixelShader( pShaderBlob->GetBufferPointer(), pShaderBlob->GetBufferSize(),
-			NULL, pPixelShader));
-		SAFE_RELEASE(pShaderBlob);
-	}
 	return hr;
 }
 
@@ -446,13 +357,13 @@ void CameraPerspDX::calcProjection()
 void draw( const VboMesh &vbo )
 {
 	vbo.bind();
-	if (g_currentEffect != NULL)
-	{
-		if (vbo.getNumIndices() > 0)
-			g_currentEffect->drawIndexed(vbo.getNumIndices());
-		else
-			g_currentEffect->draw(vbo.getNumVertices());
-	}
+	//if (g_currentEffect != NULL)
+	//{
+	//	if (vbo.getNumIndices() > 0)
+	//		g_currentEffect->drawIndexed(vbo.getNumIndices());
+	//	else
+	//		g_currentEffect->draw(vbo.getNumVertices());
+	//}
 }
 
 } } // namespace cinder::dx11

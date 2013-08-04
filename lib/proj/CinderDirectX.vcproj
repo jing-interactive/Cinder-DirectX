@@ -41,7 +41,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="../../include;../../Effects11/Inc;../../../../include;../../../../boost"
+				AdditionalIncludeDirectories="../../include;../../../../include;../../../../boost"
 				PreprocessorDefinitions="WIN32;_DEBUG;_LIB"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -106,7 +106,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
-				AdditionalIncludeDirectories="../../include;../../Effects11/Inc;../../../../include;../../../../boost"
+				AdditionalIncludeDirectories="../../include;../../../../include;../../../../boost"
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
@@ -177,10 +177,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\dx11\HlslEffect.cpp"
-				>
-			</File>
-			<File
 				RelativePath="..\..\src\dx11\ImageSourceDds.cpp"
 				>
 			</File>
@@ -190,6 +186,10 @@
 			</File>
 			<File
 				RelativePath="..\..\src\dx11\SdkMesh.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\dx11\Shader.cpp"
 				>
 			</File>
 			<File
@@ -215,10 +215,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\include\dx11\d3dx11effect.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\include\dx11\DDS.h"
 				>
 			</File>
@@ -239,15 +235,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\include\dx11\HlslEffect.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\include\dx11\ImageSourceDds.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\include\dx11\LightHelper.h"
+				RelativePath="..\..\include\dx11\Light.h"
 				>
 			</File>
 			<File
@@ -256,6 +248,10 @@
 			</File>
 			<File
 				RelativePath="..\..\include\dx11\SdkMesh.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\include\dx11\Shader.h"
 				>
 			</File>
 			<File

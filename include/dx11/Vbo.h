@@ -1,6 +1,5 @@
 #pragma once
 
-#include "dx11/HlslEffect.h"
 #include "dx11/dx11.h"
 
 namespace cinder {
@@ -9,7 +8,7 @@ namespace cinder {
 
 namespace cinder { namespace dx11 {
 
-class SdkMesh;
+class SdkMesh;class Shader;
 
 template <typename T> 
 struct IndexBufferTraits
@@ -31,18 +30,17 @@ struct IndexBufferTraits<uint32_t>
 class VboMesh
 {
 private:
-	struct Obj {
-		Obj():pInputLayout(NULL), pVertexBuffer(NULL), pIndexBuffer(NULL), mVertexSize(0), mNumIndices(0), mNumVertices(0), pInputElementDescs(NULL), mNumInputElements(0),mIBFormat(DXGI_FORMAT_UNKNOWN){}
-		~Obj();
+	struct Obj 
+    {
+		Obj():mVertexStride(0), mNumIndices(0), mNumVertices(0), mIBFormat(DXGI_FORMAT_UNKNOWN){}
 
-		ID3D11InputLayout*	pInputLayout;
-		ID3D11Buffer*		pVertexBuffer;
-		ID3D11Buffer*		pIndexBuffer;
-		size_t			mVertexSize;
+		CComPtr<ID3D11InputLayout>  mInputLayout;
+		CComPtr<ID3D11Buffer>       mVertexBuffer;
+		CComPtr<ID3D11Buffer>       mIndexBuffer;
+		size_t			mVertexStride;
 		size_t			mNumIndices;
 		size_t			mNumVertices;
-		D3D11_INPUT_ELEMENT_DESC *pInputElementDescs; 
-		size_t			mNumInputElements;
+        std::vector<D3D11_INPUT_ELEMENT_DESC> InputElementDescs;
 		DXGI_FORMAT		mIBFormat;
 	};
 
@@ -51,10 +49,10 @@ private:
 public:
 	VboMesh(){}
 
-	VboMesh( const TriMesh &triMesh, bool normalMap = false, bool flipOrder = true );
-	VboMesh( const SdkMesh &sdkMesh, bool normalMap = false, bool flipOrder = true );
+	VboMesh( const TriMesh& triMesh, bool normalMap = false, bool flipOrder = true );
+	VboMesh( const SdkMesh& sdkMesh, bool normalMap = false, bool flipOrder = true );
 
-	HRESULT createInputLayout(dx11::HlslEffect& effect, int pass = 0);
+	HRESULT createInputLayout(dx11::Shader* shader);
 
 	size_t	getNumIndices() const { return mObj->mNumIndices; }
 	size_t	getNumVertices() const { return mObj->mNumVertices; }
@@ -78,7 +76,7 @@ public:
 		InitData.pSysMem = pIndices;
 		mObj->mNumIndices = nIndices;
 		mObj->mIBFormat = IndexBufferTraits<IndexType>::getDXGIFormat();
-		return dx11::getDevice()->CreateBuffer( &bd, &InitData, &mObj->pIndexBuffer );
+		return dx11::getDevice()->CreateBuffer( &bd, &InitData, &mObj->mIndexBuffer );
 	}
 
 	void bind(D3D_PRIMITIVE_TOPOLOGY Topology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST) const;
