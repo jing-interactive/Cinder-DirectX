@@ -15,3 +15,10 @@
 *.ncb
 *.pdb
 *.obj
+/samples/NormalMap/vc9/Debug
+
+/lib/proj/Debug/*.idb
+
+/lib/proj/Debug/*.htm
+
+/lib/CinderDirectX_d.lib
